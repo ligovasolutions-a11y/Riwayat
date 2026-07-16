@@ -140,8 +140,9 @@
     <button class="abtn" id="logoutBtn">Log Out</button>
   </div>
   <div class="admin-help">
-    <b>Click any text</b> on the page below to edit it, then press <b>Save Changes</b>.
-    <b>Alt + Click</b> interacts with the page normally (open menus, accordions, switch pages).
+    <b>Click any text</b> to edit it in place. Clicking also selects the surrounding block —
+    use the small toolbar that appears to <b>Duplicate</b> (add), <b>Delete</b>, <b>Move</b>, or edit a <b>Link</b>.
+    <b>Alt + Click</b> uses the page normally (open menus, accordions). Press <b>Save Changes</b> when done.
   </div>
   <iframe class="editor-frame" id="editorFrame"></iframe>
 </div>
@@ -164,8 +165,9 @@
   var dirtyFlag = document.getElementById('dirtyFlag');
   var toastEl = document.getElementById('toast');
 
-  /* Map<Element, originalHTML> of elements edited in the current iframe */
-  var edited = new Map();
+  var dirty = false;
+  var selected = null;   /* currently selected block in the iframe */
+  var toolbar = null;    /* floating toolbar element inside the iframe */
 
   function toast(msg) {
     toastEl.textContent = msg;
@@ -179,6 +181,11 @@
   }
   function saveStore(store) {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+
+  function setDirty(v) {
+    dirty = v;
+    dirtyFlag.style.display = v ? 'inline' : 'none';
   }
 
   /* ---------- Auth ---------- */
@@ -221,41 +228,164 @@
     location.reload();
   });
 
-  /* ---------- Selector path for an element ---------- */
-  function cssPath(el) {
-    var parts = [];
-    while (el && el.nodeType === 1 && el.tagName !== 'BODY' && el.tagName !== 'HTML') {
-      var idx = 1, sib = el;
-      while ((sib = sib.previousElementSibling)) idx++;
-      parts.unshift(el.tagName.toLowerCase() + ':nth-child(' + idx + ')');
-      el = el.parentElement;
+  /* ---------- Editable / block targets ---------- */
+  var EDITABLE = 'h1,h2,h3,h4,h5,h6,p,a,span,li,label,button,small,em,strong,b,i,td,th,option,blockquote,figcaption,dt,dd,address,time,div.map-block,div.monogram,div.num,div.label';
+
+  var BLOCK = ['.product-card', '.category-card', '.testimonial-card', '.banner-card',
+    '.info-card', '.filter-block', '.accordion-item', '.form-row', '.option-group',
+    '.footer-grid > div', '.stat-row > div', '.trust-list li', '.main-nav a',
+    '.mobile-nav a', '.tab-list button', '.size-chip', '.gallery-thumbs .thumb',
+    'li', '.hero-content', '.section-heading', '.newsletter', '.page-header',
+    'section', 'footer', '.topbar', 'header'].join(',');
+
+  function hasDirectText(el) {
+    for (var i = 0; i < el.childNodes.length; i++) {
+      var n = el.childNodes[i];
+      if (n.nodeType === 3 && n.textContent.trim()) return true;
     }
-    return 'body > ' + parts.join(' > ');
+    return false;
   }
 
   /* ---------- Editor wiring inside the iframe ---------- */
-  var EDITABLE = 'h1,h2,h3,h4,p,a,span,li,label,button,small,em,td,th,option,div.map-block,div.monogram';
-
-  function setDirty() {
-    dirtyFlag.style.display = edited.size ? 'inline' : 'none';
-  }
-
   function wireFrame() {
     var doc = frame.contentDocument;
-    if (!doc) return;
-    edited = new Map();
-    setDirty();
+    if (!doc || !doc.body) return;
+    selected = null;
+    setDirty(false);
 
     var style = doc.createElement('style');
     style.textContent =
       '.rj-edit-hover { outline: 2px dashed #b7913f !important; outline-offset: 2px; cursor: text !important; }' +
-      '.rj-editing { outline: 2px solid #6d1f2b !important; outline-offset: 2px; background: rgba(183,145,63,0.08); }';
+      '.rj-editing { outline: 2px solid #6d1f2b !important; outline-offset: 2px; background: rgba(183,145,63,0.08); }' +
+      '.rj-selected { outline: 2px solid #b7913f !important; outline-offset: 3px; }' +
+      '.rj-toolbar { position: absolute; z-index: 99999; display: none; background: #171512; ' +
+      '  border: 1px solid #b7913f; box-shadow: 0 8px 24px rgba(0,0,0,0.35); font-family: Jost, sans-serif; }' +
+      '.rj-toolbar .rj-tag { color: #e8d9b5; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 0 10px; }' +
+      '.rj-toolbar button { background: none; border: none; border-left: 1px solid rgba(232,217,181,0.25); ' +
+      '  color: #e8d9b5; padding: 8px 11px; font-size: 12px; cursor: pointer; white-space: nowrap; }' +
+      '.rj-toolbar button:hover { background: #b7913f; color: #fff; }';
     doc.head.appendChild(style);
 
+    /* Floating block toolbar */
+    toolbar = doc.createElement('div');
+    toolbar.className = 'rj-toolbar';
+    toolbar.setAttribute('data-rj-ui', '1');
+    toolbar.innerHTML =
+      '<span class="rj-tag" data-a="tag"></span>' +
+      '<button data-a="parent" title="Select the bigger block around this one">⤴ Bigger</button>' +
+      '<button data-a="up" title="Move up">↑</button>' +
+      '<button data-a="down" title="Move down">↓</button>' +
+      '<button data-a="dup" title="Duplicate">⧉ Duplicate</button>' +
+      '<button data-a="link" title="Edit link URL" style="display:none;">🔗 Link</button>' +
+      '<button data-a="del" title="Delete">🗑 Delete</button>' +
+      '<button data-a="close" title="Deselect">✕</button>';
+    doc.body.appendChild(toolbar);
+    toolbar.style.display = 'flex';
+    toolbar.style.display = 'none';
+
+    function describe(el) {
+      var cls = (el.className || '').toString().split(/\s+/).filter(function (c) {
+        return c && c.indexOf('rj-') !== 0;
+      })[0];
+      return cls ? '.' + cls : el.tagName.toLowerCase();
+    }
+
+    function positionToolbar() {
+      if (!selected) return;
+      var rect = selected.getBoundingClientRect();
+      var win = frame.contentWindow;
+      var top = rect.top + win.scrollY - 38;
+      if (top < win.scrollY) top = rect.bottom + win.scrollY + 6;
+      toolbar.style.top = top + 'px';
+      toolbar.style.left = Math.max(8, rect.left + win.scrollX) + 'px';
+      toolbar.style.display = 'flex';
+      toolbar.style.alignItems = 'center';
+    }
+
+    function deselect() {
+      if (selected) selected.classList.remove('rj-selected');
+      selected = null;
+      toolbar.style.display = 'none';
+    }
+
+    function select(el) {
+      if (!el || el === doc.body) { deselect(); return; }
+      if (selected) selected.classList.remove('rj-selected');
+      selected = el;
+      selected.classList.add('rj-selected');
+      toolbar.querySelector('[data-a="tag"]').textContent = describe(el);
+      toolbar.querySelector('[data-a="link"]').style.display =
+        el.tagName === 'A' ? '' : 'none';
+      positionToolbar();
+    }
+
+    function cleanClone(el) {
+      var c = el.cloneNode(true);
+      var all = [c].concat(Array.prototype.slice.call(c.querySelectorAll('*')));
+      all.forEach(function (n) {
+        n.removeAttribute && n.removeAttribute('contenteditable');
+        if (n.classList) {
+          n.classList.remove('rj-editing', 'rj-edit-hover', 'rj-selected');
+          if (!n.classList.length) n.removeAttribute('class');
+        }
+      });
+      return c;
+    }
+
+    toolbar.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn || !selected) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var a = btn.getAttribute('data-a');
+      if (a === 'close') { deselect(); return; }
+      if (a === 'parent') {
+        var p = selected.parentElement && selected.parentElement.closest(BLOCK);
+        if (p && p !== doc.body) select(p);
+        return;
+      }
+      if (a === 'up' || a === 'down') {
+        var sib = a === 'up' ? selected.previousElementSibling : selected.nextElementSibling;
+        while (sib && sib.hasAttribute('data-rj-ui')) {
+          sib = a === 'up' ? sib.previousElementSibling : sib.nextElementSibling;
+        }
+        if (sib) {
+          if (a === 'up') sib.before(selected); else sib.after(selected);
+          setDirty(true);
+          positionToolbar();
+        }
+        return;
+      }
+      if (a === 'dup') {
+        var copy = cleanClone(selected);
+        selected.after(copy);
+        setDirty(true);
+        select(copy);
+        toast('Block duplicated — click its text to change it');
+        return;
+      }
+      if (a === 'link') {
+        var href = prompt('Link URL:', selected.getAttribute('href') || '');
+        if (href !== null) { selected.setAttribute('href', href); setDirty(true); }
+        return;
+      }
+      if (a === 'del') {
+        if (!confirm('Delete this block (' + describe(selected) + ')?')) return;
+        var gone = selected;
+        deselect();
+        gone.remove();
+        setDirty(true);
+        toast('Block deleted');
+      }
+    });
+
+    /* Hover highlight */
     var hovered = null;
     doc.addEventListener('mouseover', function (e) {
       if (e.altKey) return;
+      if (e.target.closest('[data-rj-ui]')) return;
       var el = e.target.closest && e.target.closest(EDITABLE);
+      if (!el && e.target.nodeType === 1 && hasDirectText(e.target)) el = e.target;
       if (hovered && hovered !== el) hovered.classList.remove('rj-edit-hover');
       if (el && !el.isContentEditable) { el.classList.add('rj-edit-hover'); hovered = el; }
     });
@@ -263,33 +393,55 @@
       if (hovered) { hovered.classList.remove('rj-edit-hover'); hovered = null; }
     });
 
-    /* Capture-phase click: block the page's own behaviour and start editing.
-       Alt+Click falls through so menus/accordions/links still work. */
+    /* Capture-phase click: block the page's own behaviour, start editing,
+       and select the surrounding block. Alt+Click falls through. */
     doc.addEventListener('click', function (e) {
       if (e.altKey) return;
-      var el = e.target.closest && e.target.closest(EDITABLE);
+      if (e.target.closest('[data-rj-ui]')) return;
       e.preventDefault();
       e.stopPropagation();
-      if (!el) return;
-      if (el.isContentEditable) return;
-      el.classList.remove('rj-edit-hover');
-      if (!edited.has(el)) edited.set(el, el.innerHTML);
-      el.classList.add('rj-editing');
-      el.setAttribute('contenteditable', 'true');
-      el.focus();
+
+      var t = e.target;
+
+      /* Inputs & textareas: edit their placeholder text */
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') {
+        var ph = prompt('Placeholder text for this field:', t.getAttribute('placeholder') || '');
+        if (ph !== null) { t.setAttribute('placeholder', ph); setDirty(true); }
+        return;
+      }
+
+      /* Text editing target */
+      var el = t.closest && t.closest(EDITABLE);
+      if (!el && t.nodeType === 1 && hasDirectText(t)) el = t;
+      if (el && !el.isContentEditable) {
+        el.classList.remove('rj-edit-hover');
+        el.setAttribute('data-rj-orig', el.innerHTML);
+        el.classList.add('rj-editing');
+        el.setAttribute('contenteditable', 'true');
+        el.focus();
+      }
+
+      /* Block selection for the toolbar */
+      var block = t.closest && t.closest(BLOCK);
+      select(block || el);
     }, true);
 
     doc.addEventListener('blur', function (e) {
       var el = e.target;
-      if (!(el instanceof frame.contentWindow.HTMLElement) || !el.isContentEditable) return;
+      if (!el || el.nodeType !== 1 || !el.isContentEditable) return;
       el.removeAttribute('contenteditable');
       el.classList.remove('rj-editing');
-      if (edited.get(el) === el.innerHTML) edited.delete(el);
-      setDirty();
+      var orig = el.getAttribute('data-rj-orig');
+      el.removeAttribute('data-rj-orig');
+      if (orig !== null && orig !== el.innerHTML) setDirty(true);
     }, true);
 
     /* Block form submits while editing */
     doc.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); }, true);
+
+    frame.contentWindow.addEventListener('scroll', function () {
+      if (selected) positionToolbar();
+    }, { passive: true });
   }
 
   function loadPage(page) {
@@ -298,42 +450,47 @@
 
   frame.addEventListener('load', wireFrame);
 
+  function currentPage() {
+    var src = frame.getAttribute('src') || 'index.html';
+    return src.split('?')[0];
+  }
+
   pageSelect.addEventListener('change', function () {
-    if (edited.size && !confirm('You have unsaved changes on this page. Switch anyway?')) {
+    if (dirty && !confirm('You have unsaved changes on this page. Switch anyway?')) {
       pageSelect.value = currentPage();
       return;
     }
     loadPage(pageSelect.value);
   });
 
-  function currentPage() {
-    var src = frame.getAttribute('src') || 'index.html';
-    return src.split('?')[0];
-  }
-
-  /* ---------- Toolbar actions ---------- */
+  /* ---------- Save: snapshot the whole page body ---------- */
   document.getElementById('saveBtn').addEventListener('click', function () {
-    /* Commit any element still being edited */
-    var active = frame.contentDocument && frame.contentDocument.activeElement;
+    var doc = frame.contentDocument;
+    if (!doc) return;
+
+    var active = doc.activeElement;
     if (active && active.isContentEditable) active.blur();
 
-    if (!edited.size) { toast('Nothing to save'); return; }
-    var store = loadStore();
-    var page = currentPage();
-    store[page] = store[page] || {};
-    edited.forEach(function (original, el) {
-      el.classList.remove('rj-editing', 'rj-edit-hover');
-      el.removeAttribute('contenteditable');
-      store[page][cssPath(el)] = el.innerHTML;
+    var clone = doc.body.cloneNode(true);
+    /* Strip editor UI and editor artifacts */
+    Array.prototype.forEach.call(clone.querySelectorAll('[data-rj-ui]'), function (n) { n.remove(); });
+    var all = clone.querySelectorAll('*');
+    Array.prototype.forEach.call(all, function (n) {
+      n.removeAttribute('contenteditable');
+      n.removeAttribute('data-rj-orig');
+      n.classList.remove('rj-editing', 'rj-edit-hover', 'rj-selected');
+      if (!n.classList.length) n.removeAttribute('class');
     });
+
+    var store = loadStore();
+    store[currentPage()] = { body: clone.innerHTML };
     saveStore(store);
-    edited = new Map();
-    setDirty();
+    setDirty(false);
     toast('Saved ✓ — changes are now live on the site');
   });
 
   document.getElementById('discardBtn').addEventListener('click', function () {
-    if (edited.size && !confirm('Discard unsaved edits on this page?')) return;
+    if (dirty && !confirm('Discard unsaved edits on this page?')) return;
     loadPage(currentPage());
   });
 
@@ -386,7 +543,7 @@
   });
 
   window.addEventListener('beforeunload', function (e) {
-    if (edited.size) { e.preventDefault(); e.returnValue = ''; }
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
   });
 
   /* ---------- Boot ---------- */
