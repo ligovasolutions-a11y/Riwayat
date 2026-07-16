@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Riwayat Jewels</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: var(--cream-dark); min-height: 100vh; }
+
+  /* ----- Login ----- */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--black) 0%, #2c2620 55%, var(--maroon) 130%);
+  }
+  .login-card {
+    background: var(--cream);
+    padding: 48px 42px;
+    width: 100%;
+    max-width: 420px;
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+  }
+  .login-card .logo { margin-bottom: 8px; }
+  .login-card p.sub { text-align: center; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 30px; }
+  .login-card label { display: block; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+  .login-card input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .login-error { color: var(--maroon); font-size: 13px; margin-bottom: 14px; display: none; }
+
+  /* ----- Editor shell ----- */
+  .admin-shell { display: none; flex-direction: column; height: 100vh; }
+  .admin-bar {
+    background: var(--black);
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    flex-wrap: wrap;
+  }
+  .admin-bar .brand { font-family: var(--font-serif); font-size: 19px; color: var(--white); margin-right: 8px; white-space: nowrap; }
+  .admin-bar .brand span { color: var(--gold); }
+  .admin-bar select {
+    background: #2c2620;
+    color: var(--gold-light);
+    border: 1px solid rgba(232,217,181,0.3);
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .abtn {
+    padding: 9px 16px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1px solid rgba(232,217,181,0.35);
+    color: var(--gold-light);
+    background: transparent;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .abtn:hover { background: rgba(232,217,181,0.12); }
+  .abtn-save { background: var(--gold); border-color: var(--gold); color: var(--white); }
+  .abtn-save:hover { background: var(--gold-dark); }
+  .abtn-danger:hover { background: var(--maroon); border-color: var(--maroon); color: var(--white); }
+  .admin-bar .spacer { flex: 1; }
+  .dirty-flag { font-size: 12px; color: var(--gold); display: none; }
+  .admin-help {
+    background: var(--gold-pale);
+    border-bottom: 1px solid var(--border);
+    padding: 9px 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .admin-help b { color: var(--ink); font-weight: 500; }
+  .editor-frame { flex: 1; border: none; width: 100%; background: var(--white); }
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--black);
+    color: var(--gold-light);
+    padding: 13px 26px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ===== Login ===== -->
+<div class="login-wrap" id="loginView">
+  <form class="login-card" id="loginForm">
+    <div class="logo">Riwayat <span>Jewels</span></div>
+    <p class="sub">Admin Panel</p>
+    <label for="u">Username</label>
+    <input type="text" id="u" autocomplete="username" required>
+    <label for="p">Password</label>
+    <input type="password" id="p" autocomplete="current-password" required>
+    <div class="login-error" id="loginError">Incorrect username or password.</div>
+    <button type="submit" class="btn btn-gold btn-block">Sign In</button>
+  </form>
+</div>
+
+<!-- ===== Editor ===== -->
+<div class="admin-shell" id="adminView">
+  <div class="admin-bar">
+    <span class="brand">Riwayat <span>Jewels</span> · Admin</span>
+    <select id="pageSelect">
+      <option value="index.html">Home</option>
+      <option value="shop.html">Shop</option>
+      <option value="product.html">Product Detail</option>
+      <option value="about.html">Our Story</option>
+      <option value="contact.html">Contact</option>
+    </select>
+    <button class="abtn abtn-save" id="saveBtn">Save Changes</button>
+    <button class="abtn" id="discardBtn">Discard</button>
+    <span class="dirty-flag" id="dirtyFlag">● Unsaved changes</span>
+    <span class="spacer"></span>
+    <button class="abtn" id="exportBtn">Export</button>
+    <button class="abtn" id="importBtn">Import</button>
+    <input type="file" id="importFile" accept="application/json" hidden>
+    <button class="abtn abtn-danger" id="resetPageBtn">Reset Page</button>
+    <button class="abtn abtn-danger" id="resetAllBtn">Reset All</button>
+    <button class="abtn" id="logoutBtn">Log Out</button>
+  </div>
+  <div class="admin-help">
+    <b>Click any text</b> on the page below to edit it, then press <b>Save Changes</b>.
+    <b>Alt + Click</b> interacts with the page normally (open menus, accordions, switch pages).
+  </div>
+  <iframe class="editor-frame" id="editorFrame"></iframe>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORE_KEY = 'riwayat_content';
+  var SESSION_KEY = 'riwayat_admin_session';
+  /* SHA-256 of "username:password" */
+  var CRED_HASH = '6da984c9f971fb61ddba989adcbf0023b495dcf67ac1d3c0f65619f3d2c6e54b';
+
+  var loginView = document.getElementById('loginView');
+  var adminView = document.getElementById('adminView');
+  var frame = document.getElementById('editorFrame');
+  var pageSelect = document.getElementById('pageSelect');
+  var dirtyFlag = document.getElementById('dirtyFlag');
+  var toastEl = document.getElementById('toast');
+
+  /* Map<Element, originalHTML> of elements edited in the current iframe */
+  var edited = new Map();
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
+  }
+
+  function loadStore() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveStore(store) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+
+  /* ---------- Auth ---------- */
+  function sha256Hex(str) {
+    var data = new TextEncoder().encode(str);
+    return crypto.subtle.digest('SHA-256', data).then(function (buf) {
+      return Array.from(new Uint8Array(buf)).map(function (b) {
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+    });
+  }
+
+  function showAdmin() {
+    loginView.style.display = 'none';
+    adminView.style.display = 'flex';
+    loadPage(pageSelect.value);
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var u = document.getElementById('u').value.trim();
+    var p = document.getElementById('p').value;
+    if (!window.crypto || !crypto.subtle) {
+      alert('This admin page needs to be opened over http(s), not as a plain file.');
+      return;
+    }
+    sha256Hex(u + ':' + p).then(function (hex) {
+      if (hex === CRED_HASH) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        document.getElementById('loginError').style.display = 'none';
+        showAdmin();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
+
+  /* ---------- Selector path for an element ---------- */
+  function cssPath(el) {
+    var parts = [];
+    while (el && el.nodeType === 1 && el.tagName !== 'BODY' && el.tagName !== 'HTML') {
+      var idx = 1, sib = el;
+      while ((sib = sib.previousElementSibling)) idx++;
+      parts.unshift(el.tagName.toLowerCase() + ':nth-child(' + idx + ')');
+      el = el.parentElement;
+    }
+    return 'body > ' + parts.join(' > ');
+  }
+
+  /* ---------- Editor wiring inside the iframe ---------- */
+  var EDITABLE = 'h1,h2,h3,h4,p,a,span,li,label,button,small,em,td,th,option,div.map-block,div.monogram';
+
+  function setDirty() {
+    dirtyFlag.style.display = edited.size ? 'inline' : 'none';
+  }
+
+  function wireFrame() {
+    var doc = frame.contentDocument;
+    if (!doc) return;
+    edited = new Map();
+    setDirty();
+
+    var style = doc.createElement('style');
+    style.textContent =
+      '.rj-edit-hover { outline: 2px dashed #b7913f !important; outline-offset: 2px; cursor: text !important; }' +
+      '.rj-editing { outline: 2px solid #6d1f2b !important; outline-offset: 2px; background: rgba(183,145,63,0.08); }';
+    doc.head.appendChild(style);
+
+    var hovered = null;
+    doc.addEventListener('mouseover', function (e) {
+      if (e.altKey) return;
+      var el = e.target.closest && e.target.closest(EDITABLE);
+      if (hovered && hovered !== el) hovered.classList.remove('rj-edit-hover');
+      if (el && !el.isContentEditable) { el.classList.add('rj-edit-hover'); hovered = el; }
+    });
+    doc.addEventListener('mouseout', function () {
+      if (hovered) { hovered.classList.remove('rj-edit-hover'); hovered = null; }
+    });
+
+    /* Capture-phase click: block the page's own behaviour and start editing.
+       Alt+Click falls through so menus/accordions/links still work. */
+    doc.addEventListener('click', function (e) {
+      if (e.altKey) return;
+      var el = e.target.closest && e.target.closest(EDITABLE);
+      e.preventDefault();
+      e.stopPropagation();
+      if (!el) return;
+      if (el.isContentEditable) return;
+      el.classList.remove('rj-edit-hover');
+      if (!edited.has(el)) edited.set(el, el.innerHTML);
+      el.classList.add('rj-editing');
+      el.setAttribute('contenteditable', 'true');
+      el.focus();
+    }, true);
+
+    doc.addEventListener('blur', function (e) {
+      var el = e.target;
+      if (!(el instanceof frame.contentWindow.HTMLElement) || !el.isContentEditable) return;
+      el.removeAttribute('contenteditable');
+      el.classList.remove('rj-editing');
+      if (edited.get(el) === el.innerHTML) edited.delete(el);
+      setDirty();
+    }, true);
+
+    /* Block form submits while editing */
+    doc.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); }, true);
+  }
+
+  function loadPage(page) {
+    frame.src = page + '?rjedit=' + Date.now();
+  }
+
+  frame.addEventListener('load', wireFrame);
+
+  pageSelect.addEventListener('change', function () {
+    if (edited.size && !confirm('You have unsaved changes on this page. Switch anyway?')) {
+      pageSelect.value = currentPage();
+      return;
+    }
+    loadPage(pageSelect.value);
+  });
+
+  function currentPage() {
+    var src = frame.getAttribute('src') || 'index.html';
+    return src.split('?')[0];
+  }
+
+  /* ---------- Toolbar actions ---------- */
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    /* Commit any element still being edited */
+    var active = frame.contentDocument && frame.contentDocument.activeElement;
+    if (active && active.isContentEditable) active.blur();
+
+    if (!edited.size) { toast('Nothing to save'); return; }
+    var store = loadStore();
+    var page = currentPage();
+    store[page] = store[page] || {};
+    edited.forEach(function (original, el) {
+      el.classList.remove('rj-editing', 'rj-edit-hover');
+      el.removeAttribute('contenteditable');
+      store[page][cssPath(el)] = el.innerHTML;
+    });
+    saveStore(store);
+    edited = new Map();
+    setDirty();
+    toast('Saved ✓ — changes are now live on the site');
+  });
+
+  document.getElementById('discardBtn').addEventListener('click', function () {
+    if (edited.size && !confirm('Discard unsaved edits on this page?')) return;
+    loadPage(currentPage());
+  });
+
+  document.getElementById('resetPageBtn').addEventListener('click', function () {
+    if (!confirm('Remove ALL saved edits for this page and restore the original content?')) return;
+    var store = loadStore();
+    delete store[currentPage()];
+    saveStore(store);
+    loadPage(currentPage());
+    toast('Page restored to original');
+  });
+
+  document.getElementById('resetAllBtn').addEventListener('click', function () {
+    if (!confirm('Remove ALL saved edits on EVERY page? This cannot be undone.')) return;
+    localStorage.removeItem(STORE_KEY);
+    loadPage(currentPage());
+    toast('All pages restored to original');
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(loadStore(), null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'riwayat-content.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Exported riwayat-content.json');
+  });
+
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', function () {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (typeof data !== 'object' || data === null) throw new Error('bad');
+        saveStore(data);
+        loadPage(currentPage());
+        toast('Imported — edits applied');
+      } catch (e) {
+        alert('That file is not a valid content export.');
+      }
+    };
+    reader.readAsText(file);
+    this.value = '';
+  });
+
+  window.addEventListener('beforeunload', function (e) {
+    if (edited.size) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ---------- Boot ---------- */
+  if (sessionStorage.getItem(SESSION_KEY) === '1') showAdmin();
+})();
+</script>
+</body>
+</html>
