@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { getPublishedBlock } from '@/lib/content';
 import TabList from '@/components/site/TabList';
@@ -29,7 +30,7 @@ export default async function ShopPage() {
       <div className="page-header">
         <div className="container">
           <h1>{header.title}</h1>
-          <div className="breadcrumb"><a href="/">Home</a> / {header.breadcrumb}</div>
+          <div className="breadcrumb"><Link href="/">Home</Link> / {header.breadcrumb}</div>
         </div>
       </div>
 
