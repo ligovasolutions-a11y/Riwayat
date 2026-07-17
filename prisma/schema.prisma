@@ -1,0 +1,169 @@
+// Riwayat Jewels CMS schema.
+// Provider is SQLite (zero external services, single file in /prisma/dev.db).
+// To move to PostgreSQL later: change provider to "postgresql" and set
+// DATABASE_URL to a real connection string — no other schema changes needed.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  username            String    @unique
+  passwordHash        String
+  mustChangePassword  Boolean   @default(true)
+  failedAttempts      Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  sessions            Session[]
+  resetTokens         PasswordResetToken[]
+}
+
+model Session {
+  id        String   @id // random token, also the cookie value
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  csrfToken String
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id // random token
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Generic structured content block. Each page has an ordered list of
+// blocks; block_key selects which admin form + public template to use.
+// draftJson is what the admin edits and can preview; publishedJson is
+// what the public site renders — "Publish" copies draft -> published.
+model ContentBlock {
+  id             Int      @id @default(autoincrement())
+  page           String // 'global' | 'home' | 'shop' | 'about' | 'contact'
+  blockKey       String
+  label          String
+  draftJson      String
+  publishedJson  String
+  position       Int      @default(0)
+  enabled        Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+  updatedBy      String?
+
+  @@unique([page, blockKey])
+  @@index([page, position])
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  slug          String   @unique
+  name          String
+  category      String
+  icon          String   @default("ring")
+  price         String
+  oldPrice      String?
+  badge         String?
+  rating        Int      @default(5)
+  description   String   @default("")
+  metals        String   @default("[]") // JSON array
+  sizes         String   @default("[]") // JSON array
+  stockNote     String   @default("")
+  detailsText   String   @default("")
+  shippingText  String   @default("")
+  careText      String   @default("")
+  reviewCount   Int      @default(0)
+  image         String? // uploaded media filename
+  featured      Boolean  @default(false)
+  position      Int      @default(0)
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model BlogPost {
+  id              Int       @id @default(autoincrement())
+  slug            String    @unique
+  title           String
+  excerpt         String    @default("")
+  contentHtml     String    @default("")
+  coverImage      String?
+  status          String    @default("draft") // 'draft' | 'published'
+  seoTitle        String    @default("")
+  seoDescription  String    @default("")
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model MediaAsset {
+  id            Int      @id @default(autoincrement())
+  filename      String   @unique
+  originalName  String
+  mime          String
+  size          Int
+  width         Int?
+  height        Int?
+  uploadedBy    String?
+  createdAt     DateTime @default(now())
+}
+
+model Enquiry {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  source    String   @default("contact") // 'contact' | 'newsletter'
+  createdAt DateTime @default(now())
+}
+
+model SeoMeta {
+  id          Int      @id @default(autoincrement())
+  page        String   @unique // 'home' | 'shop' | 'about' | 'contact' | 'blog'
+  title       String   @default("")
+  description String   @default("")
+  keywords    String   @default("")
+  ogImage     String?
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id           Int      @id @default(1)
+  siteName     String   @default("Riwayat Jewels")
+  logoText1    String   @default("Riwayat")
+  logoText2    String   @default("Jewels")
+  logoImage    String?
+  favicon      String?
+  colorGold    String   @default("#b7913f")
+  colorMaroon  String   @default("#6d1f2b")
+  colorCream   String   @default("#faf7f1")
+  colorBlack   String   @default("#171512")
+  updatedAt    DateTime @updatedAt
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  username  String?
+  action    String
+  detail    String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
