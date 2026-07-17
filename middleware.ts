@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
     ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`
     : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`;
 
-  const csp = [
+  const directives = [
     "default-src 'self'",
     scriptSrc,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -33,8 +33,18 @@ export function middleware(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    'upgrade-insecure-requests',
-  ].join('; ');
+  ];
+
+  // Production-only: Safari (unlike Chrome/Firefox) applies this directive
+  // even on http://localhost, silently rewriting every CSS/JS asset request
+  // to https:// — which the plain-http dev server can't answer, so local
+  // development renders as an unstyled page. In production the site sits
+  // behind HTTPS anyway, which is where this directive belongs.
+  if (process.env.NODE_ENV === 'production') {
+    directives.push('upgrade-insecure-requests');
+  }
+
+  const csp = directives.join('; ');
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
