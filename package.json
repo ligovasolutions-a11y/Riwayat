@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/ensure-setup.js",
     "dev": "next dev",
+    "prestart": "node scripts/ensure-setup.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
