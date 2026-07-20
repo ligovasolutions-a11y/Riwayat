@@ -1,7 +1,6 @@
-'use client'
-
 import Link from 'next/link'
 import { Instagram, Facebook, Youtube, Phone, Mail, MapPin } from 'lucide-react'
+import { getAllSettings } from '@/lib/db'
 
 const footerLinks = {
   Jewellery: ['Bridal Collections', 'Diamond Jewellery', 'Gold Jewellery', 'Polki & Kundan', 'Earrings', 'Bangles & Bracelets', 'Pendants & Necklaces'],
@@ -11,6 +10,17 @@ const footerLinks = {
 }
 
 export default function Footer() {
+  const settings = getAllSettings()
+  const phone = settings.phone || '+91 99999 88888'
+  const email = settings.email || 'hello@riwaayatjewels.com'
+  const address = settings.address || '123 Luxury Lane, Bandra West, Mumbai — 400050'
+  const instagram = settings.instagram || 'riwaayatjewels'
+  const facebook = settings.facebook || 'riwaayatjewels'
+  const youtube = settings.youtube || '@riwaayatjewels'
+  const [addressLine1, addressLine2] = address.split(',').length > 1
+    ? [address.split(',').slice(0, -1).join(',').trim(), address.split(',').slice(-1)[0].trim()]
+    : [address, '']
+
   return (
     <footer className="bg-rw-black text-white">
       {/* Top section */}
@@ -27,13 +37,13 @@ export default function Footer() {
             Where Heritage Meets Time — crafting timeless jewellery and curating exceptional timepieces since 1974.
           </p>
           <div className="flex items-center justify-center gap-6 mt-8">
-            <a href="https://instagram.com/riwaayatjewels" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
+            <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
               <Instagram size={18} />
             </a>
-            <a href="https://facebook.com/riwaayatjewels" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
+            <a href={`https://facebook.com/${facebook}`} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
               <Facebook size={18} />
             </a>
-            <a href="https://youtube.com/@riwaayatjewels" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
+            <a href={`https://youtube.com/${youtube}`} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-rw-gold transition-colors">
               <Youtube size={18} />
             </a>
           </div>
@@ -66,14 +76,14 @@ export default function Footer() {
             <MapPin size={14} className="text-rw-gold mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gold mb-1">Boutique</p>
-              <p className="text-white/50 text-xs font-sans leading-relaxed">123 Luxury Lane, Bandra West<br />Mumbai — 400050</p>
+              <p className="text-white/50 text-xs font-sans leading-relaxed">{addressLine1}{addressLine2 && <><br />{addressLine2}</>}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Phone size={14} className="text-rw-gold mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gold mb-1">Telephone</p>
-              <p className="text-white/50 text-xs font-sans">+91 99999 88888</p>
+              <p className="text-white/50 text-xs font-sans">{phone}</p>
               <p className="text-white/50 text-xs font-sans">+91 22 4000 5555</p>
             </div>
           </div>
@@ -81,7 +91,7 @@ export default function Footer() {
             <Mail size={14} className="text-rw-gold mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gold mb-1">Email</p>
-              <p className="text-white/50 text-xs font-sans">hello@riwaayatjewels.com</p>
+              <p className="text-white/50 text-xs font-sans">{email}</p>
               <p className="text-white/50 text-xs font-sans">appointments@riwaayatjewels.com</p>
             </div>
           </div>

@@ -3,6 +3,8 @@ import Footer from '@/components/Footer'
 import AIConsierge from '@/components/AIConsierge'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const brands = [
   { name: 'Rolex', desc: 'The Crown Jewel of Watchmaking', count: '25+', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&q=85&auto=format&fit=crop' },
   { name: 'Omega', desc: 'Precision Swiss Engineering', count: '40+', image: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=700&q=85&auto=format&fit=crop' },

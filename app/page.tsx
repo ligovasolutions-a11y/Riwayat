@@ -12,6 +12,8 @@ import InstagramGallery from '@/components/InstagramGallery'
 import Footer from '@/components/Footer'
 import AIConsierge from '@/components/AIConsierge'
 
+export const dynamic = 'force-dynamic'
+
 export default function HomePage() {
   return (
     <main>

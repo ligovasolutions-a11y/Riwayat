@@ -3,6 +3,8 @@ import Footer from '@/components/Footer'
 import AIConsierge from '@/components/AIConsierge'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const collections = [
   { name: 'Bridal', count: '120+ pieces', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=700&q=85&auto=format&fit=crop', href: '/jewellery/bridal' },
   { name: 'Diamond', count: '80+ pieces', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=700&q=85&auto=format&fit=crop', href: '/jewellery/diamond' },

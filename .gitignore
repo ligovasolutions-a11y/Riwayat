@@ -4,3 +4,14 @@ node_modules/
 .env.local
 *.log
 node_modules/
+tsconfig.tsbuildinfo
+
+# Local SQLite database and its WAL/SHM sidecar files
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/backups/*.zip
+
+# Admin-uploaded images (persisted on the server, not in git)
+public/uploads/*
+!public/uploads/.gitkeep

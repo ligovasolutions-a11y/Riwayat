@@ -72,7 +72,7 @@ export default function AIConsierge() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white shadow-2xl border border-rw-border flex flex-col" style={{ height: '540px' }}>
+        <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white shadow-2xl border border-rw-border flex flex-col" style={{ height: '540px', maxHeight: 'calc(100vh - 6rem)' }}>
           {/* Header */}
           <div className="bg-rw-black p-5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
@@ -84,7 +84,7 @@ export default function AIConsierge() {
                 <p className="text-white/40 text-[10px] tracking-wider uppercase font-sans">AI Luxury Assistant</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white transition-colors">
+            <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white transition-colors p-2 -m-2">
               <X size={18} />
             </button>
           </div>

@@ -3,6 +3,8 @@ import Footer from '@/components/Footer'
 import AIConsierge from '@/components/AIConsierge'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const values = [
   { title: 'Integrity', desc: 'Every gem certified. Every weight accurate. Every promise kept.' },
   { title: 'Craftsmanship', desc: 'Handcrafted by master artisans trained through three generations.' },
