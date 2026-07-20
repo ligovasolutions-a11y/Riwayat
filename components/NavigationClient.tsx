@@ -50,7 +50,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Left nav */}
-            <div className="hidden lg:flex items-center gap-8 flex-1">
+            <div className="hidden xl:flex items-center gap-8 flex-1">
               {navLinks.slice(0, 4).map((link) => (
                 <div
                   key={link.label}
@@ -95,7 +95,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
             </div>
 
             {/* Right nav */}
-            <div className="hidden lg:flex items-center gap-8 flex-1 justify-end">
+            <div className="hidden xl:flex items-center gap-8 flex-1 justify-end">
               {navLinks.slice(4).map((link) => (
                 <Link
                   key={link.label}
@@ -123,7 +123,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
 
             {/* Mobile menu button */}
             <button
-              className="lg:hidden text-rw-black p-2 -m-2"
+              className="xl:hidden text-rw-black p-2 -m-2"
               onClick={() => setMobileOpen(true)}
             >
               <Menu size={22} />
@@ -133,7 +133,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="fixed inset-0 bg-white z-[100] flex flex-col lg:hidden">
+          <div className="fixed inset-0 bg-white z-[100] flex flex-col xl:hidden">
             <div className="flex items-center justify-between p-6 border-b border-rw-border">
               <Link href="/" onClick={() => setMobileOpen(false)}>
                 <div className="text-xl tracking-[0.3em] font-serif font-light text-rw-black uppercase">Riwaayat</div>
