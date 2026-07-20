@@ -31,7 +31,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: var(--font-sans);
@@ -40,6 +40,7 @@ body {
   line-height: 1.6;
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 img, svg { display: block; max-width: 100%; }
@@ -222,6 +223,12 @@ h1, h2, h3, h4 {
   color: var(--ink);
 }
 
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: -11px;
+}
+
 .icon-btn svg { width: 100%; height: 100%; }
 
 .icon-btn:hover { color: var(--gold-dark); }
@@ -240,10 +247,17 @@ h1, h2, h3, h4 {
 }
 
 .nav-toggle {
+  position: relative;
   display: none;
   width: 26px; height: 20px;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.nav-toggle::after {
+  content: '';
+  position: absolute;
+  inset: -12px -9px;
 }
 
 .nav-toggle span { display: block; height: 1.5px; background: var(--ink); }
@@ -852,6 +866,22 @@ h1, h2, h3, h4 {
   .footer-grid { grid-template-columns: 1fr; }
   .hero { min-height: 76vh; text-align: left; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .gallery-thumbs { gap: 10px; }
+  .gallery-thumbs .thumb { width: 68px; height: 68px; }
+  .pd-actions { flex-direction: column; }
+}
+
+/* ---------- Small phones (320–480px) ---------- */
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+  .header-inner { padding: 14px 16px; gap: 14px; }
+  .logo { font-size: 21px; }
+  .section { padding: 60px 0; }
+  .category-grid, .product-grid { gap: 14px; }
+  .gallery-thumbs { gap: 8px; }
+  .gallery-thumbs .thumb { width: 58px; height: 58px; }
+  .btn { padding: 13px 24px; }
+  .qty-row { flex-wrap: wrap; gap: 12px; }
 }
 
 /* ---------- Mobile nav drawer ---------- */
