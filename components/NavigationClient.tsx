@@ -84,7 +84,8 @@ export default function NavigationClient({ announcement }: { announcement: strin
 
             {/* Center logo */}
             <div className="flex-1 flex justify-center">
-              <Link href="/" className="text-center group">
+              <Link href="/" className="text-center group flex flex-col items-center">
+                <img src="/logo-icon.png" alt="" className="h-8 lg:h-9 w-auto mb-1 opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="text-xl lg:text-2xl tracking-[0.3em] font-serif font-light text-rw-black group-hover:text-rw-gold transition-colors duration-300 uppercase">
                   Riwaayat
                 </div>
@@ -135,9 +136,12 @@ export default function NavigationClient({ announcement }: { announcement: strin
         {mobileOpen && (
           <div className="fixed inset-0 bg-white z-[100] flex flex-col xl:hidden">
             <div className="flex items-center justify-between p-6 border-b border-rw-border">
-              <Link href="/" onClick={() => setMobileOpen(false)}>
-                <div className="text-xl tracking-[0.3em] font-serif font-light text-rw-black uppercase">Riwaayat</div>
-                <div className="text-[8px] tracking-[0.5em] uppercase font-sans text-rw-gold">Jewels</div>
+              <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
+                <img src="/logo-icon.png" alt="" className="h-9 w-auto" />
+                <div>
+                  <div className="text-xl tracking-[0.3em] font-serif font-light text-rw-black uppercase">Riwaayat</div>
+                  <div className="text-[8px] tracking-[0.5em] uppercase font-sans text-rw-gold">Jewels</div>
+                </div>
               </Link>
               <button onClick={() => setMobileOpen(false)} className="p-2 -m-2">
                 <X size={22} />

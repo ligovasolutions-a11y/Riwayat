@@ -27,6 +27,7 @@ export default function Footer() {
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-20 pb-12">
         {/* Logo & tagline */}
         <div className="text-center mb-16 pb-16 border-b border-white/10">
+          <img src="/logo-icon.png" alt="" className="h-14 lg:h-16 w-auto mx-auto mb-4" />
           <div className="text-3xl lg:text-4xl tracking-[0.4em] font-serif font-light text-white mb-2 uppercase">
             Riwaayat
           </div>

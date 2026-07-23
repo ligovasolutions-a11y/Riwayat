@@ -56,6 +56,7 @@ export default function AdminShell({ email, children }: { email: string; childre
       >
         {/* Logo */}
         <div className="p-5 border-b border-white/10 flex items-center gap-3">
+          <img src="/logo-icon.png" alt="" className="h-8 w-auto flex-shrink-0" />
           {(sidebarOpen || mobileOpen) && (
             <div>
               <div className="text-lg tracking-[0.3em] font-serif font-light text-white uppercase">Riwaayat</div>
