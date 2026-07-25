@@ -6,6 +6,7 @@ import { ArrowLeft, Save, X } from 'lucide-react'
 import Link from 'next/link'
 import type { Product } from '@/lib/content'
 import ImageUploadField from '../_components/ImageUploadField'
+import GalleryUploadField from '../_components/GalleryUploadField'
 
 export type ProductFormValues = {
   name: string
@@ -43,6 +44,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       : emptyForm
   )
   const [tags, setTags] = useState<string[]>(product?.tags ?? ['handcrafted', 'luxury'])
+  const [images, setImages] = useState<string[]>(product?.images ?? [])
   const [tagInput, setTagInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -63,7 +65,7 @@ export default function ProductForm({ product }: { product?: Product }) {
     setError('')
     setSaving(true)
     try {
-      const payload = { ...form, tags }
+      const payload = { ...form, tags, images }
       const res = await fetch(product ? `/api/products/${product.id}` : '/api/products', {
         method: product ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -157,6 +159,11 @@ export default function ProductForm({ product }: { product?: Product }) {
           <div className="bg-white border border-gray-200 p-6">
             <h2 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-3 mb-4">Product Image</h2>
             <ImageUploadField label="" value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
+          </div>
+
+          <div className="bg-white border border-gray-200 p-6">
+            <h2 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-3 mb-4">Gallery Images</h2>
+            <GalleryUploadField label="" images={images} onChange={setImages} />
           </div>
         </div>
 

@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
     phone: String(data.phone).slice(0, 50),
     company: String(data.company ?? '').slice(0, 200),
     product_interest: String(data.product_interest ?? '').slice(0, 200),
+    colour: String(data.colour ?? '').slice(0, 100),
+    cut: String(data.cut ?? '').slice(0, 100),
+    clarity: String(data.clarity ?? '').slice(0, 100),
+    carat_weight: String(data.carat_weight ?? '').slice(0, 100),
     message: String(data.message ?? '').slice(0, 2000),
     status: 'new',
   })

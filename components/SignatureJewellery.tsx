@@ -56,9 +56,11 @@ export default function SignatureJewellery() {
                 {/* Content */}
                 <div className={`${reverse ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
                   {piece.subcategory && <span className="section-label mb-4 block">{piece.subcategory}</span>}
-                  <h3 className="luxury-heading text-3xl lg:text-5xl xl:text-6xl text-rw-black leading-none mb-6 lg:mb-8">
-                    {piece.name}
-                  </h3>
+                  <Link href={`/product/${piece.id}`}>
+                    <h3 className="luxury-heading text-3xl lg:text-5xl xl:text-6xl text-rw-black leading-none mb-6 lg:mb-8 hover:text-rw-gold transition-colors">
+                      {piece.name}
+                    </h3>
+                  </Link>
                   <p className="text-rw-gray font-sans font-light text-base lg:text-lg leading-relaxed mb-8 lg:mb-10 max-w-md">
                     {description}
                   </p>

@@ -117,7 +117,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
                 <Link href="/wishlist" className="text-rw-black hover:text-rw-gold transition-colors duration-200">
                   <Heart size={16} />
                 </Link>
-                <Link href="/profile" className="text-rw-black hover:text-rw-gold transition-colors duration-200">
+                <Link href="/admin" title="Admin Login" className="text-rw-black hover:text-rw-gold transition-colors duration-200">
                   <User size={16} />
                 </Link>
               </div>
@@ -182,7 +182,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
               <Link href="/wishlist" onClick={() => setMobileOpen(false)} className="p-2 -m-2">
                 <Heart size={20} className="text-rw-black" />
               </Link>
-              <Link href="/profile" onClick={() => setMobileOpen(false)} className="p-2 -m-2">
+              <Link href="/admin" title="Admin Login" onClick={() => setMobileOpen(false)} className="p-2 -m-2">
                 <User size={20} className="text-rw-black" />
               </Link>
             </div>

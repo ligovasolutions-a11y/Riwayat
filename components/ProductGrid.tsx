@@ -1,10 +1,11 @@
+import Link from 'next/link'
 import type { Product } from '@/lib/content'
 
 export default function ProductGrid({ products }: { products: Product[] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
       {products.map((p) => (
-        <div key={p.id} className="group">
+        <Link key={p.id} href={`/product/${p.id}`} className="group block">
           <div className="relative overflow-hidden bg-rw-light mb-4" style={{ aspectRatio: '1/1' }}>
             {p.image ? (
               <img
@@ -29,10 +30,10 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             {p.name}
           </h3>
           <div className="flex items-center justify-between">
-            <p className="font-sans text-rw-black font-medium">{p.price}</p>
+            <p className="font-sans text-rw-black font-medium">{p.price || 'Price on Request'}</p>
             <p className="text-[10px] tracking-wider uppercase font-sans text-rw-gray">{p.stock}</p>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   )

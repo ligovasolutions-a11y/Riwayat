@@ -9,6 +9,7 @@ export type Product = {
   stock: string
   status: string
   image: string
+  images: string[]
   description: string
   story: string
   material: string
@@ -75,13 +76,21 @@ export type Quote = {
   phone: string
   company: string
   product_interest: string
+  colour: string
+  cut: string
+  clarity: string
+  carat_weight: string
   message: string
   status: string
   created_at: string
 }
 
-type RawProduct = Omit<Product, 'tags'> & { tags: string }
-const parseProduct = (row: RawProduct): Product => ({ ...row, tags: JSON.parse(row.tags || '[]') })
+type RawProduct = Omit<Product, 'tags' | 'images'> & { tags: string; images: string }
+const parseProduct = (row: RawProduct): Product => ({
+  ...row,
+  tags: JSON.parse(row.tags || '[]'),
+  images: JSON.parse(row.images || '[]'),
+})
 
 export function listProducts(): Product[] {
   return (db.prepare('SELECT * FROM products ORDER BY sort_order ASC, id DESC').all() as RawProduct[]).map(parseProduct)
@@ -99,12 +108,13 @@ export function listPublishedProductsBySubcategorySlug(category: string, slug: s
 }
 export function createProduct(data: Partial<Product>): Product {
   const info = db.prepare(`
-    INSERT INTO products (name, category, subcategory, price, stock, status, image, description, story, material, weight, certification, warranty, sku, tags)
-    VALUES (@name, @category, @subcategory, @price, @stock, @status, @image, @description, @story, @material, @weight, @certification, @warranty, @sku, @tags)
+    INSERT INTO products (name, category, subcategory, price, stock, status, image, images, description, story, material, weight, certification, warranty, sku, tags)
+    VALUES (@name, @category, @subcategory, @price, @stock, @status, @image, @images, @description, @story, @material, @weight, @certification, @warranty, @sku, @tags)
   `).run({
     name: data.name ?? '', category: data.category ?? 'Jewellery', subcategory: data.subcategory ?? '',
     price: data.price ?? '', stock: data.stock ?? 'Available', status: data.status ?? 'draft',
-    image: data.image ?? '', description: data.description ?? '', story: data.story ?? '',
+    image: data.image ?? '', images: JSON.stringify(data.images ?? []),
+    description: data.description ?? '', story: data.story ?? '',
     material: data.material ?? '', weight: data.weight ?? '', certification: data.certification ?? '',
     warranty: data.warranty ?? '', sku: data.sku ?? '', tags: JSON.stringify(data.tags ?? []),
   })
@@ -116,10 +126,10 @@ export function updateProduct(id: number, data: Partial<Product>): Product | nul
   const merged = { ...existing, ...data }
   db.prepare(`
     UPDATE products SET name=@name, category=@category, subcategory=@subcategory, price=@price, stock=@stock,
-      status=@status, image=@image, description=@description, story=@story, material=@material, weight=@weight,
+      status=@status, image=@image, images=@images, description=@description, story=@story, material=@material, weight=@weight,
       certification=@certification, warranty=@warranty, sku=@sku, tags=@tags, updated_at=datetime('now')
     WHERE id=@id
-  `).run({ ...merged, id, tags: JSON.stringify(merged.tags ?? []) })
+  `).run({ ...merged, id, tags: JSON.stringify(merged.tags ?? []), images: JSON.stringify(merged.images ?? []) })
   return getProduct(id)
 }
 export function deleteProduct(id: number) {
@@ -257,11 +267,13 @@ export function getQuote(id: number): Quote | null {
 }
 export function createQuote(data: Partial<Quote>): Quote {
   const info = db.prepare(`
-    INSERT INTO quotes (name, email, phone, company, product_interest, message, status)
-    VALUES (@name, @email, @phone, @company, @product_interest, @message, @status)
+    INSERT INTO quotes (name, email, phone, company, product_interest, colour, cut, clarity, carat_weight, message, status)
+    VALUES (@name, @email, @phone, @company, @product_interest, @colour, @cut, @clarity, @carat_weight, @message, @status)
   `).run({
     name: data.name ?? '', email: data.email ?? '', phone: data.phone ?? '', company: data.company ?? '',
-    product_interest: data.product_interest ?? '', message: data.message ?? '', status: data.status ?? 'new',
+    product_interest: data.product_interest ?? '',
+    colour: data.colour ?? '', cut: data.cut ?? '', clarity: data.clarity ?? '', carat_weight: data.carat_weight ?? '',
+    message: data.message ?? '', status: data.status ?? 'new',
   })
   return getQuote(Number(info.lastInsertRowid))!
 }

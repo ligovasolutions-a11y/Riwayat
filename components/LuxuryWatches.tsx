@@ -66,7 +66,7 @@ export default function LuxuryWatches() {
                   </div>
                 )}
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Link href="/appointments" className="bg-rw-gold text-white text-[10px] tracking-[0.2em] uppercase font-sans px-4 py-2">
+                  <Link href={`/get-a-quote?product=${encodeURIComponent(watch.name)}`} className="bg-rw-gold text-white text-[10px] tracking-[0.2em] uppercase font-sans px-4 py-2">
                     Enquire
                   </Link>
                 </div>
@@ -75,10 +75,12 @@ export default function LuxuryWatches() {
                 {watch.sku && (
                   <p className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray mb-1">Ref. {watch.sku}</p>
                 )}
-                <h3 className="font-serif text-xl font-light text-rw-black mb-2 group-hover:text-rw-gold transition-colors">
-                  {watch.name}
-                </h3>
-                <p className="font-sans text-rw-black font-medium">{watch.price}</p>
+                <Link href={`/product/${watch.id}`}>
+                  <h3 className="font-serif text-xl font-light text-rw-black mb-2 group-hover:text-rw-gold transition-colors">
+                    {watch.name}
+                  </h3>
+                </Link>
+                <p className="font-sans text-rw-black font-medium">{watch.price || 'Price on Request'}</p>
               </div>
             </div>
           ))}

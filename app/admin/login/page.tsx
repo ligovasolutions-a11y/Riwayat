@@ -15,6 +15,9 @@ export default async function AdminLoginPage() {
           <div className="text-[9px] tracking-[0.5em] uppercase font-sans text-rw-gold mt-1">Admin Portal</div>
         </div>
         <LoginForm />
+        <p className="text-center text-white/30 text-xs font-sans mt-6">
+          This portal is only for Riwaayat Jewels staff.
+        </p>
       </div>
     </div>
   )

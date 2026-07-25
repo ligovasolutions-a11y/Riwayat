@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import { getSetting } from '@/lib/db'
@@ -41,7 +42,9 @@ export default function GetAQuotePage() {
 
             {/* Right: Form */}
             <div>
-              <QuoteForm />
+              <Suspense fallback={null}>
+                <QuoteForm />
+              </Suspense>
             </div>
           </div>
         </div>

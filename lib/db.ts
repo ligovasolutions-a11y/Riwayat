@@ -42,6 +42,7 @@ function migrate() {
       stock TEXT DEFAULT 'Available',
       status TEXT NOT NULL DEFAULT 'draft',
       image TEXT DEFAULT '',
+      images TEXT NOT NULL DEFAULT '[]',
       description TEXT DEFAULT '',
       story TEXT DEFAULT '',
       material TEXT DEFAULT '',
@@ -108,6 +109,10 @@ function migrate() {
       phone TEXT DEFAULT '',
       company TEXT DEFAULT '',
       product_interest TEXT DEFAULT '',
+      colour TEXT DEFAULT '',
+      cut TEXT DEFAULT '',
+      clarity TEXT DEFAULT '',
+      carat_weight TEXT DEFAULT '',
       message TEXT DEFAULT '',
       status TEXT NOT NULL DEFAULT 'new',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -118,6 +123,20 @@ function migrate() {
       value TEXT NOT NULL DEFAULT ''
     );
   `)
+
+  // Add columns introduced after initial release to databases that already exist.
+  ensureColumn('products', 'images', "TEXT NOT NULL DEFAULT '[]'")
+  ensureColumn('quotes', 'colour', "TEXT DEFAULT ''")
+  ensureColumn('quotes', 'cut', "TEXT DEFAULT ''")
+  ensureColumn('quotes', 'clarity', "TEXT DEFAULT ''")
+  ensureColumn('quotes', 'carat_weight', "TEXT DEFAULT ''")
+}
+
+function ensureColumn(table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+  }
 }
 
 function seed() {
@@ -258,7 +277,7 @@ function seed() {
   }
 }
 
-migrate()
+db.transaction(migrate)()
 db.transaction(seed)()
 
 export function getSetting(key: string, fallback = ''): string {

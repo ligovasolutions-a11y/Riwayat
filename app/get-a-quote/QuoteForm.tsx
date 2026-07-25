@@ -1,14 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 
 export default function QuoteForm() {
+  const searchParams = useSearchParams()
+  const prefillProduct = searchParams.get('product') || ''
+
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', company: '', product_interest: '', message: '',
+    name: '', email: '', phone: '', company: '', product_interest: prefillProduct,
+    colour: '', cut: '', clarity: '', carat_weight: '', message: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +50,12 @@ export default function QuoteForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {prefillProduct && (
+        <div className="bg-rw-light border border-rw-gold px-4 py-3">
+          <p className="text-[10px] tracking-wider uppercase font-sans text-rw-gray">Enquiring about</p>
+          <p className="text-sm font-sans text-rw-black font-medium">{prefillProduct}</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Full Name *</label>
@@ -96,6 +107,49 @@ export default function QuoteForm() {
           placeholder="e.g. Rolex Submariner, Bridal Gold Set…"
         />
       </div>
+
+      <div className="border-t border-rw-border pt-6">
+        <p className="text-xs tracking-[0.3em] uppercase font-sans text-rw-gold mb-4">Requirements</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Colour</label>
+            <input
+              value={form.colour}
+              onChange={(e) => setForm({ ...form, colour: e.target.value })}
+              className="w-full border border-rw-border px-4 py-3 text-sm font-sans text-rw-black outline-none focus:border-rw-gold transition-colors"
+              placeholder="e.g. D, E, F…"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Cut</label>
+            <input
+              value={form.cut}
+              onChange={(e) => setForm({ ...form, cut: e.target.value })}
+              className="w-full border border-rw-border px-4 py-3 text-sm font-sans text-rw-black outline-none focus:border-rw-gold transition-colors"
+              placeholder="e.g. Excellent, Very Good…"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Clarity</label>
+            <input
+              value={form.clarity}
+              onChange={(e) => setForm({ ...form, clarity: e.target.value })}
+              className="w-full border border-rw-border px-4 py-3 text-sm font-sans text-rw-black outline-none focus:border-rw-gold transition-colors"
+              placeholder="e.g. VS1, VVS2…"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Carat / Weight</label>
+            <input
+              value={form.carat_weight}
+              onChange={(e) => setForm({ ...form, carat_weight: e.target.value })}
+              className="w-full border border-rw-border px-4 py-3 text-sm font-sans text-rw-black outline-none focus:border-rw-gold transition-colors"
+              placeholder="e.g. 1.5 carat, 45 grams…"
+            />
+          </div>
+        </div>
+      </div>
+
       <div>
         <label className="text-[10px] tracking-[0.3em] uppercase font-sans text-rw-gray block mb-2">Message</label>
         <textarea

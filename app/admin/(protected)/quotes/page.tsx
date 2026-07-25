@@ -1,8 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Mail, Phone, Building2, Trash2 } from 'lucide-react'
+import { Mail, Phone, Building2, Trash2, Eye } from 'lucide-react'
 import type { Quote } from '@/lib/content'
+
+function formatDate(value: string) {
+  const d = new Date(value.replace(' ', 'T'))
+  if (isNaN(d.getTime())) return value
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 export default function QuotesAdmin() {
   const [filter, setFilter] = useState('all')
@@ -38,6 +44,13 @@ export default function QuotesAdmin() {
     await fetch(`/api/quotes/${id}`, { method: 'DELETE' })
   }
 
+  const requirementChips = (q: Quote) => [
+    q.colour && `Colour: ${q.colour}`,
+    q.cut && `Cut: ${q.cut}`,
+    q.clarity && `Clarity: ${q.clarity}`,
+    q.carat_weight && `Carat/Weight: ${q.carat_weight}`,
+  ].filter(Boolean) as string[]
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between mb-8">
@@ -58,49 +71,71 @@ export default function QuotesAdmin() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* List */}
-        <div className="lg:col-span-3 bg-white border border-gray-200 rounded-sm divide-y divide-gray-50">
-          {filtered.map((q) => (
-            <div
-              key={q.id}
-              onClick={() => openQuote(q)}
-              className={`p-5 cursor-pointer hover:bg-gray-50 transition-colors ${selected?.id === q.id ? 'bg-amber-50 border-l-2 border-rw-gold' : ''}`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <p className="text-sm font-medium text-gray-900">{q.name}</p>
-                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 ${q.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {q.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-rw-gold tracking-wide truncate">{q.product_interest || 'General enquiry'}</p>
-                  <p className="text-xs text-gray-500 mt-1">{q.email}</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteQuote(q.id) }}
-                  className="p-1.5 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                  title="Delete"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
-          {!loading && filtered.length === 0 && <div className="p-12 text-center text-sm text-gray-400">No quote requests found.</div>}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {/* Table */}
+        <div className="xl:col-span-3 bg-white border border-gray-200 rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  {['Name', 'Contact', 'Product Interested', 'Submitted', 'Status', 'Actions'].map((h) => (
+                    <th key={h} className="px-5 py-3 text-left text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filtered.map((q) => (
+                  <tr
+                    key={q.id}
+                    onClick={() => openQuote(q)}
+                    className={`cursor-pointer hover:bg-gray-50 transition-colors ${selected?.id === q.id ? 'bg-amber-50' : ''}`}
+                  >
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-medium text-gray-900">{q.name}</p>
+                      {q.company && <p className="text-xs text-gray-400">{q.company}</p>}
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="text-xs text-gray-600">{q.email}</p>
+                      <p className="text-xs text-gray-400">{q.phone}</p>
+                    </td>
+                    <td className="px-5 py-4 text-xs text-gray-600 max-w-[160px] truncate">{q.product_interest || 'General enquiry'}</td>
+                    <td className="px-5 py-4 text-xs text-gray-500 whitespace-nowrap">{formatDate(q.created_at)}</td>
+                    <td className="px-5 py-4">
+                      <span className={`text-[10px] uppercase tracking-wider px-2 py-1 ${q.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {q.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <button onClick={(e) => { e.stopPropagation(); openQuote(q) }} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="View">
+                          <Eye size={14} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); deleteQuote(q.id) }} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!loading && filtered.length === 0 && (
+            <div className="text-center py-12 text-sm text-gray-400">No quote requests found.</div>
+          )}
         </div>
 
         {/* Detail */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           {selected ? (
             <div className="bg-white border border-gray-200 rounded-sm p-6 space-y-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-lg font-serif font-light text-gray-900">{selected.name}</h2>
                   {selected.company && <p className="text-xs text-gray-500 mt-1">{selected.company}</p>}
+                  <p className="text-xs text-gray-400 mt-1">Submitted {formatDate(selected.created_at)}</p>
                 </div>
-                <span className={`text-[10px] uppercase tracking-wider px-3 py-1 ${selected.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-[10px] uppercase tracking-wider px-3 py-1 flex-shrink-0 ${selected.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
                   {selected.status}
                 </span>
               </div>
@@ -124,6 +159,16 @@ export default function QuotesAdmin() {
                   <p className="text-sm text-gray-700">{selected.product_interest}</p>
                 </div>
               )}
+              {requirementChips(selected).length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">Requirements</p>
+                  <div className="flex flex-wrap gap-2">
+                    {requirementChips(selected).map((chip) => (
+                      <span key={chip} className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5">{chip}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {selected.message && (
                 <div>
                   <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">Message</p>
@@ -141,7 +186,7 @@ export default function QuotesAdmin() {
             </div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-sm p-8 text-center text-sm text-gray-400">
-              Select a quote request to view details
+              Select a quote request to view full details
             </div>
           )}
         </div>
