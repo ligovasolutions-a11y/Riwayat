@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Layers, Calendar, BookOpen,
   Home, Settings, Menu, X, ChevronRight, Bell, Search,
-  LogOut,
+  LogOut, MessageSquare,
 } from 'lucide-react'
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { href: '/admin/products', icon: Package, label: 'Products' },
   { href: '/admin/collections', icon: Layers, label: 'Collections' },
   { href: '/admin/appointments', icon: Calendar, label: 'Appointments' },
+  { href: '/admin/quotes', icon: MessageSquare, label: 'Quotes' },
   { href: '/admin/journal', icon: BookOpen, label: 'Journal' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ]

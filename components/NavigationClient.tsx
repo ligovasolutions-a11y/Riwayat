@@ -8,11 +8,12 @@ const navLinks = [
   { label: 'Jewellery', href: '/jewellery', sub: ['Bridal', 'Diamond', 'Gold', 'Polki', 'Kundan', 'Pendants', 'Earrings', 'Bangles'] },
   { label: 'Watches', href: '/watches', sub: ['Rolex', 'Omega', 'TAG Heuer', 'Longines', 'Tissot', 'IWC'] },
   { label: 'Collections', href: '/collections', sub: ['New Arrivals', 'Bestsellers', 'Limited Edition', 'Gift Sets'] },
-  { label: 'Brands', href: '/brands', sub: [] },
   { label: 'Journal', href: '/journal', sub: [] },
   { label: 'Appointments', href: '/appointments', sub: [] },
+  { label: 'Get a Quote', href: '/get-a-quote', sub: [] },
   { label: 'About', href: '/about', sub: [] },
 ]
+const LEFT_NAV_COUNT = 3
 
 export default function NavigationClient({ announcement }: { announcement: string }) {
   const [scrolled, setScrolled] = useState(false)
@@ -51,7 +52,7 @@ export default function NavigationClient({ announcement }: { announcement: strin
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Left nav */}
             <div className="hidden xl:flex items-center gap-8 flex-1">
-              {navLinks.slice(0, 4).map((link) => (
+              {navLinks.slice(0, LEFT_NAV_COUNT).map((link) => (
                 <div
                   key={link.label}
                   className="relative group"
@@ -97,11 +98,11 @@ export default function NavigationClient({ announcement }: { announcement: strin
 
             {/* Right nav */}
             <div className="hidden xl:flex items-center gap-8 flex-1 justify-end">
-              {navLinks.slice(4).map((link) => (
+              {navLinks.slice(LEFT_NAV_COUNT).map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-xs tracking-widest uppercase font-sans font-medium text-rw-black hover:text-rw-gold transition-colors duration-200"
+                  className="text-xs tracking-widest uppercase font-sans font-medium text-rw-black hover:text-rw-gold transition-colors duration-200 whitespace-nowrap"
                 >
                   {link.label}
                 </Link>

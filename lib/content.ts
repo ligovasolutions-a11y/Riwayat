@@ -68,6 +68,18 @@ export type Appointment = {
   created_at: string
 }
 
+export type Quote = {
+  id: number
+  name: string
+  email: string
+  phone: string
+  company: string
+  product_interest: string
+  message: string
+  status: string
+  created_at: string
+}
+
 type RawProduct = Omit<Product, 'tags'> & { tags: string }
 const parseProduct = (row: RawProduct): Product => ({ ...row, tags: JSON.parse(row.tags || '[]') })
 
@@ -80,6 +92,10 @@ export function listPublishedProducts(): Product[] {
 export function getProduct(id: number): Product | null {
   const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id) as RawProduct | undefined
   return row ? parseProduct(row) : null
+}
+export function listPublishedProductsBySubcategorySlug(category: string, slug: string): Product[] {
+  return listPublishedProducts()
+    .filter((p) => p.category === category && slugify(p.subcategory) === slug)
 }
 export function createProduct(data: Partial<Product>): Product {
   const info = db.prepare(`
@@ -161,6 +177,9 @@ export function getJournalPostBySlug(slug: string): JournalPost | null {
 export function slugify(title: string): string {
   return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
+export function humanizeSlug(slug: string): string {
+  return slug.split('-').filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')
+}
 export function uniqueSlug(base: string, ignoreId?: number): string {
   let slug = slugify(base) || 'post'
   let n = 2
@@ -228,4 +247,28 @@ export function updateAppointmentStatus(id: number, status: string): Appointment
 }
 export function deleteAppointment(id: number) {
   db.prepare('DELETE FROM appointments WHERE id = ?').run(id)
+}
+
+export function listQuotes(): Quote[] {
+  return db.prepare('SELECT * FROM quotes ORDER BY id DESC').all() as Quote[]
+}
+export function getQuote(id: number): Quote | null {
+  return (db.prepare('SELECT * FROM quotes WHERE id = ?').get(id) as Quote | undefined) ?? null
+}
+export function createQuote(data: Partial<Quote>): Quote {
+  const info = db.prepare(`
+    INSERT INTO quotes (name, email, phone, company, product_interest, message, status)
+    VALUES (@name, @email, @phone, @company, @product_interest, @message, @status)
+  `).run({
+    name: data.name ?? '', email: data.email ?? '', phone: data.phone ?? '', company: data.company ?? '',
+    product_interest: data.product_interest ?? '', message: data.message ?? '', status: data.status ?? 'new',
+  })
+  return getQuote(Number(info.lastInsertRowid))!
+}
+export function updateQuoteStatus(id: number, status: string): Quote | null {
+  db.prepare('UPDATE quotes SET status = ? WHERE id = ?').run(status, id)
+  return getQuote(id)
+}
+export function deleteQuote(id: number) {
+  db.prepare('DELETE FROM quotes WHERE id = ?').run(id)
 }
