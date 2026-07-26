@@ -64,7 +64,7 @@ export default function HeroClient({ slides, buttons }: { slides: HeroSlide[]; b
             <Link href="/watches" className="btn-outline-gold min-w-[200px] text-center border-white text-white hover:bg-white hover:text-rw-black">
               {buttons.btn2}
             </Link>
-            <Link href="/appointments" className="text-white text-xs tracking-[0.3em] uppercase font-sans underline underline-offset-4 hover:text-rw-gold transition-colors">
+            <Link href="/appointments" className="btn-outline-gold min-w-[200px] text-center border-white text-white hover:bg-white hover:text-rw-black">
               {buttons.btn3}
             </Link>
           </div>

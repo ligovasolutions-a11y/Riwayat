@@ -51,6 +51,25 @@ function migrate() {
       warranty TEXT DEFAULT '',
       sku TEXT DEFAULT '',
       tags TEXT NOT NULL DEFAULT '[]',
+      policy TEXT DEFAULT '',
+      gross_weight TEXT DEFAULT '',
+      gold_weight TEXT DEFAULT '',
+      diamond_weight TEXT DEFAULT '',
+      caratage TEXT DEFAULT '',
+      collection TEXT DEFAULT '',
+      case_size TEXT DEFAULT '',
+      case_material TEXT DEFAULT '',
+      movement TEXT DEFAULT '',
+      dial_colour TEXT DEFAULT '',
+      strap_material TEXT DEFAULT '',
+      crystal TEXT DEFAULT '',
+      water_resistance TEXT DEFAULT '',
+      power_reserve TEXT DEFAULT '',
+      functions TEXT DEFAULT '',
+      condition TEXT DEFAULT '',
+      box_papers TEXT DEFAULT '',
+      gender TEXT DEFAULT '',
+      year TEXT DEFAULT '',
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -67,6 +86,16 @@ function migrate() {
       size TEXT NOT NULL DEFAULT 'small',
       products_count INTEGER NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'draft',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS jewellery_categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      image TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -108,11 +137,14 @@ function migrate() {
       email TEXT DEFAULT '',
       phone TEXT DEFAULT '',
       company TEXT DEFAULT '',
+      category TEXT NOT NULL DEFAULT 'Jewellery',
       product_interest TEXT DEFAULT '',
       colour TEXT DEFAULT '',
       cut TEXT DEFAULT '',
       clarity TEXT DEFAULT '',
       carat_weight TEXT DEFAULT '',
+      reference_number TEXT DEFAULT '',
+      brand TEXT DEFAULT '',
       message TEXT DEFAULT '',
       status TEXT NOT NULL DEFAULT 'new',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -130,6 +162,12 @@ function migrate() {
   ensureColumn('quotes', 'cut', "TEXT DEFAULT ''")
   ensureColumn('quotes', 'clarity', "TEXT DEFAULT ''")
   ensureColumn('quotes', 'carat_weight', "TEXT DEFAULT ''")
+  ensureColumn('quotes', 'category', "TEXT NOT NULL DEFAULT 'Jewellery'")
+  ensureColumn('quotes', 'reference_number', "TEXT DEFAULT ''")
+  ensureColumn('quotes', 'brand', "TEXT DEFAULT ''")
+  for (const col of ['policy', 'gross_weight', 'gold_weight', 'diamond_weight', 'caratage', 'collection', 'case_size', 'case_material', 'movement', 'dial_colour', 'strap_material', 'crystal', 'water_resistance', 'power_reserve', 'functions', 'condition', 'box_papers', 'gender', 'year']) {
+    ensureColumn('products', col, "TEXT DEFAULT ''")
+  }
 }
 
 function ensureColumn(table: string, column: string, definition: string) {
@@ -146,11 +184,11 @@ function seed() {
       (name, category, subcategory, price, stock, status, image, tags, sort_order)
       VALUES (@name, @category, @subcategory, @price, @stock, @status, @image, @tags, @sort_order)`)
     const products = [
-      { name: 'Royal Bridal Set', category: 'Jewellery', subcategory: 'Bridal', price: '₹3,80,000', stock: 'Available', status: 'active', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 1 },
+      { name: 'Royal Bridal Set', category: 'Jewellery', subcategory: 'Sets', price: '₹3,80,000', stock: 'Available', status: 'active', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 1 },
       { name: 'Rolex Submariner Date', category: 'Watches', subcategory: 'Rolex', price: '₹12,50,000', stock: 'In Stock', status: 'active', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 2 },
-      { name: 'Diamond Solitaire Ring 1.5ct', category: 'Jewellery', subcategory: 'Diamond', price: '₹1,20,000', stock: 'Available', status: 'active', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 3 },
+      { name: 'Diamond Solitaire Ring 1.5ct', category: 'Jewellery', subcategory: 'Rings', price: '₹1,20,000', stock: 'Available', status: 'active', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 3 },
       { name: 'Omega Seamaster 300M', category: 'Watches', subcategory: 'Omega', price: '₹5,80,000', stock: 'In Stock', status: 'active', image: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 4 },
-      { name: 'Gold Polki Necklace Set', category: 'Jewellery', subcategory: 'Polki', price: '₹2,45,000', stock: 'Made to Order', status: 'active', image: 'https://images.unsplash.com/photo-1573408301185-9519f94816b5?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 5 },
+      { name: 'Gold Polki Necklace Set', category: 'Jewellery', subcategory: 'Sets', price: '₹2,45,000', stock: 'Made to Order', status: 'active', image: 'https://images.unsplash.com/photo-1573408301185-9519f94816b5?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 5 },
       { name: 'TAG Heuer Carrera Chronograph', category: 'Watches', subcategory: 'TAG Heuer', price: '₹3,20,000', stock: 'In Stock', status: 'draft', image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=80&q=70&auto=format&fit=crop', tags: '["handcrafted","luxury"]', sort_order: 6 },
     ]
     for (const p of products) insert.run(p)
@@ -162,14 +200,29 @@ function seed() {
       (name, subtitle, category, tag, image, href, size, products_count, status, sort_order)
       VALUES (@name, @subtitle, @category, @tag, @image, @href, @size, @products_count, @status, @sort_order)`)
     const collections = [
-      { name: 'Bridal Couture', subtitle: 'For the most precious day of your life', category: 'Jewellery', tag: 'New Season', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=900&q=85&auto=format&fit=crop', href: '/jewellery/bridal', size: 'large', products_count: 120, status: 'active', sort_order: 1 },
+      { name: 'Bridal Couture', subtitle: 'For the most precious day of your life', category: 'Jewellery', tag: 'New Season', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=900&q=85&auto=format&fit=crop', href: '/jewellery/sets', size: 'large', products_count: 120, status: 'active', sort_order: 1 },
       { name: 'Swiss Timepieces', subtitle: 'Precision engineering meets artistry', category: 'Watches', tag: 'Authorised Dealer', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&q=85&auto=format&fit=crop', href: '/watches', size: 'large', products_count: 85, status: 'active', sort_order: 2 },
-      { name: 'Diamond Atelier', subtitle: 'GIA certified brilliance', category: 'Jewellery', tag: 'Exclusive', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=85&auto=format&fit=crop', href: '/jewellery/diamond', size: 'small', products_count: 60, status: 'active', sort_order: 3 },
+      { name: 'Diamond Atelier', subtitle: 'GIA certified brilliance', category: 'Jewellery', tag: 'Exclusive', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=85&auto=format&fit=crop', href: '/jewellery/rings', size: 'small', products_count: 60, status: 'active', sort_order: 3 },
       { name: 'Heritage Gold', subtitle: 'Handcrafted Indian traditions', category: 'Jewellery', tag: 'Bestseller', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=85&auto=format&fit=crop', href: '/jewellery/gold', size: 'small', products_count: 200, status: 'active', sort_order: 4 },
       { name: 'Polki & Kundan', subtitle: '', category: 'Jewellery', tag: '', image: '', href: '/jewellery/polki', size: 'small', products_count: 45, status: 'active', sort_order: 5 },
       { name: 'Summer Edit 2025', subtitle: '', category: 'Jewellery', tag: 'Coming Soon', image: '', href: '/collections/summer-edit-2025', size: 'small', products_count: 0, status: 'draft', sort_order: 6 },
     ]
     for (const c of collections) insert.run(c)
+  }
+
+  const jewelleryCategoryCount = (db.prepare('SELECT COUNT(*) as c FROM jewellery_categories').get() as { c: number }).c
+  if (jewelleryCategoryCount === 0) {
+    const insert = db.prepare(`INSERT INTO jewellery_categories
+      (name, image, status, sort_order)
+      VALUES (@name, @image, @status, @sort_order)`)
+    const categories = [
+      { name: 'Rings', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=700&q=85&auto=format&fit=crop', status: 'active', sort_order: 1 },
+      { name: 'Earrings', image: 'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=700&q=85&auto=format&fit=crop', status: 'active', sort_order: 2 },
+      { name: 'Bracelets', image: 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=700&q=85&auto=format&fit=crop', status: 'active', sort_order: 3 },
+      { name: 'Bangles', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=700&q=85&auto=format&fit=crop', status: 'active', sort_order: 4 },
+      { name: 'Sets', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=700&q=85&auto=format&fit=crop', status: 'active', sort_order: 5 },
+    ]
+    for (const c of categories) insert.run(c)
   }
 
   const journalCount = (db.prepare('SELECT COUNT(*) as c FROM journal_posts').get() as { c: number }).c
@@ -277,8 +330,15 @@ function seed() {
   }
 }
 
-db.transaction(migrate)()
-db.transaction(seed)()
+// `next build` briefly imports every route from several parallel worker
+// processes to collect page data. Every page in this app is force-dynamic
+// (no page reads the DB at build time), so it's safe to skip migrating/seeding
+// during that phase and let it happen once, at the first real request, instead
+// of racing multiple processes over the same ALTER TABLE statements.
+if (process.env.NEXT_PHASE !== 'phase-production-build') {
+  db.transaction(migrate)()
+  db.transaction(seed)()
+}
 
 export function getSetting(key: string, fallback = ''): string {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined

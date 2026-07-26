@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, Heart, User, Menu, X, ChevronDown } from 'lucide-react'
 
-const navLinks = [
-  { label: 'Jewellery', href: '/jewellery', sub: ['Bridal', 'Diamond', 'Gold', 'Polki', 'Kundan', 'Pendants', 'Earrings', 'Bangles'] },
+const baseNavLinks = [
+  { label: 'Jewellery', href: '/jewellery', sub: [] as string[] },
   { label: 'Watches', href: '/watches', sub: ['Rolex', 'Omega', 'TAG Heuer', 'Longines', 'Tissot', 'IWC'] },
   { label: 'Collections', href: '/collections', sub: ['New Arrivals', 'Bestsellers', 'Limited Edition', 'Gift Sets'] },
   { label: 'Journal', href: '/journal', sub: [] },
@@ -15,7 +15,10 @@ const navLinks = [
 ]
 const LEFT_NAV_COUNT = 3
 
-export default function NavigationClient({ announcement }: { announcement: string }) {
+export default function NavigationClient({ announcement, jewelleryCategories }: { announcement: string; jewelleryCategories: string[] }) {
+  const navLinks = baseNavLinks.map((link) =>
+    link.label === 'Jewellery' ? { ...link, sub: jewelleryCategories } : link
+  )
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
@@ -67,16 +70,22 @@ export default function NavigationClient({ announcement }: { announcement: strin
                     {link.sub.length > 0 && <ChevronDown size={10} className="mt-0.5" />}
                   </Link>
                   {link.sub.length > 0 && activeDropdown === link.label && (
-                    <div className="absolute top-full left-0 mt-2 bg-white border border-rw-border shadow-xl min-w-[200px] py-4 z-50">
-                      {link.sub.map((s) => (
-                        <Link
-                          key={s}
-                          href={`${link.href}/${s.toLowerCase().replace(' ', '-')}`}
-                          className="block px-6 py-2 text-xs tracking-wider uppercase font-sans text-rw-gray hover:text-rw-gold hover:bg-rw-light transition-colors duration-150"
-                        >
-                          {s}
-                        </Link>
-                      ))}
+                    // The pt-2 wrapper (instead of a margin gap) keeps the hoverable
+                    // area contiguous from the trigger down into the panel, so moving
+                    // the cursor diagonally into the submenu doesn't hit a dead zone
+                    // that closes the dropdown before it's reached.
+                    <div className="absolute top-full left-0 pt-2 z-50">
+                      <div className="bg-white border border-rw-border shadow-xl min-w-[200px] py-4">
+                        {link.sub.map((s) => (
+                          <Link
+                            key={s}
+                            href={`${link.href}/${s.toLowerCase().replace(' ', '-')}`}
+                            className="block px-6 py-2 text-xs tracking-wider uppercase font-sans text-rw-gray hover:text-rw-gold hover:bg-rw-light transition-colors duration-150"
+                          >
+                            {s}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

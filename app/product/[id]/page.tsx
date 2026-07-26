@@ -35,13 +35,38 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     ? `/watches/${slugify(product.subcategory || product.name)}`
     : `/jewellery/${slugify(product.subcategory || product.name)}`
 
-  const specs = [
-    { label: 'Material', value: product.material },
-    { label: 'Weight', value: product.weight },
-    { label: 'Certification', value: product.certification },
-    { label: 'Warranty', value: product.warranty },
-    { label: 'SKU / Reference', value: product.sku },
-  ].filter((s) => s.value)
+  const isWatch = product.category === 'Watches'
+  const specs = (isWatch
+    ? [
+        { label: 'Reference Number', value: product.sku },
+        { label: 'Collection', value: product.collection },
+        { label: 'Case Size', value: product.case_size },
+        { label: 'Case Material', value: product.case_material },
+        { label: 'Movement', value: product.movement },
+        { label: 'Dial Colour', value: product.dial_colour },
+        { label: 'Strap / Bracelet Material', value: product.strap_material },
+        { label: 'Crystal', value: product.crystal },
+        { label: 'Water Resistance', value: product.water_resistance },
+        { label: 'Power Reserve', value: product.power_reserve },
+        { label: 'Functions / Complications', value: product.functions },
+        { label: 'Condition', value: product.condition },
+        { label: 'Box & Papers', value: product.box_papers },
+        { label: 'Warranty', value: product.warranty },
+        { label: 'Gender', value: product.gender },
+        { label: 'Year', value: product.year },
+      ]
+    : [
+        { label: 'Material', value: product.material },
+        { label: 'Certification', value: product.certification },
+        { label: 'Warranty', value: product.warranty },
+        { label: 'SKU / Reference', value: product.sku },
+        { label: 'Policy', value: product.policy },
+        { label: 'Gross Weight', value: product.gross_weight },
+        { label: 'Gold Weight', value: product.gold_weight },
+        { label: 'Diamond Weight', value: product.diamond_weight },
+        { label: 'Caratage', value: product.caratage },
+      ]
+  ).filter((s) => s.value)
 
   return (
     <main>
@@ -98,7 +123,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             )}
 
             <Link
-              href={`/get-a-quote?product=${encodeURIComponent(product.name)}`}
+              href={`/get-a-quote?category=${encodeURIComponent(product.category)}&product=${encodeURIComponent(product.name)}&brand=${encodeURIComponent(product.subcategory)}&ref=${encodeURIComponent(product.sku)}`}
               className="btn-gold inline-block"
             >
               Enquire About This Piece

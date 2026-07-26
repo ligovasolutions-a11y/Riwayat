@@ -14,16 +14,20 @@ export async function POST(req: NextRequest) {
   if (!data?.name || !data?.email || !data?.phone) {
     return NextResponse.json({ error: 'Name, email and phone are required.' }, { status: 400 })
   }
+  const category = data.category === 'Watches' ? 'Watches' : 'Jewellery'
   const quote = createQuote({
     name: String(data.name).slice(0, 200),
     email: String(data.email).slice(0, 200),
     phone: String(data.phone).slice(0, 50),
     company: String(data.company ?? '').slice(0, 200),
+    category,
     product_interest: String(data.product_interest ?? '').slice(0, 200),
     colour: String(data.colour ?? '').slice(0, 100),
     cut: String(data.cut ?? '').slice(0, 100),
     clarity: String(data.clarity ?? '').slice(0, 100),
     carat_weight: String(data.carat_weight ?? '').slice(0, 100),
+    reference_number: String(data.reference_number ?? '').slice(0, 100),
+    brand: String(data.brand ?? '').slice(0, 100),
     message: String(data.message ?? '').slice(0, 2000),
     status: 'new',
   })

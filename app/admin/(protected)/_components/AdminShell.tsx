@@ -6,13 +6,15 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Layers, Calendar, BookOpen,
   Home, Settings, Menu, X, ChevronRight, Bell, Search,
-  LogOut, MessageSquare,
+  LogOut, MessageSquare, Tag, Info,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/homepage', icon: Home, label: 'Homepage' },
+  { href: '/admin/about-page', icon: Info, label: 'About Page' },
   { href: '/admin/products', icon: Package, label: 'Products' },
+  { href: '/admin/categories', icon: Tag, label: 'Categories' },
   { href: '/admin/collections', icon: Layers, label: 'Collections' },
   { href: '/admin/appointments', icon: Calendar, label: 'Appointments' },
   { href: '/admin/quotes', icon: MessageSquare, label: 'Quotes' },

@@ -44,12 +44,19 @@ export default function QuotesAdmin() {
     await fetch(`/api/quotes/${id}`, { method: 'DELETE' })
   }
 
-  const requirementChips = (q: Quote) => [
-    q.colour && `Colour: ${q.colour}`,
-    q.cut && `Cut: ${q.cut}`,
-    q.clarity && `Clarity: ${q.clarity}`,
-    q.carat_weight && `Carat/Weight: ${q.carat_weight}`,
-  ].filter(Boolean) as string[]
+  const requirementChips = (q: Quote) => (
+    q.category === 'Watches'
+      ? [
+          q.reference_number && `Reference No.: ${q.reference_number}`,
+          q.brand && `Brand: ${q.brand}`,
+        ]
+      : [
+          q.colour && `Colour: ${q.colour}`,
+          q.cut && `Cut: ${q.cut}`,
+          q.clarity && `Clarity: ${q.clarity}`,
+          q.carat_weight && `Carat/Weight: ${q.carat_weight}`,
+        ]
+  ).filter(Boolean) as string[]
 
   return (
     <div className="p-6 lg:p-8">
@@ -78,7 +85,7 @@ export default function QuotesAdmin() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['Name', 'Contact', 'Product Interested', 'Submitted', 'Status', 'Actions'].map((h) => (
+                  {['Name', 'Category', 'Contact', 'Product Interested', 'Submitted', 'Status', 'Actions'].map((h) => (
                     <th key={h} className="px-5 py-3 text-left text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -93,6 +100,11 @@ export default function QuotesAdmin() {
                     <td className="px-5 py-4">
                       <p className="text-sm font-medium text-gray-900">{q.name}</p>
                       {q.company && <p className="text-xs text-gray-400">{q.company}</p>}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`text-[10px] uppercase tracking-wider px-2 py-1 ${q.category === 'Watches' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+                        {q.category}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <p className="text-xs text-gray-600">{q.email}</p>
@@ -135,9 +147,14 @@ export default function QuotesAdmin() {
                   {selected.company && <p className="text-xs text-gray-500 mt-1">{selected.company}</p>}
                   <p className="text-xs text-gray-400 mt-1">Submitted {formatDate(selected.created_at)}</p>
                 </div>
-                <span className={`text-[10px] uppercase tracking-wider px-3 py-1 flex-shrink-0 ${selected.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {selected.status}
-                </span>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span className={`text-[10px] uppercase tracking-wider px-3 py-1 ${selected.category === 'Watches' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+                    {selected.category}
+                  </span>
+                  <span className={`text-[10px] uppercase tracking-wider px-3 py-1 ${selected.status === 'new' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {selected.status}
+                  </span>
+                </div>
               </div>
               <hr className="border-gray-100" />
               {[
@@ -155,7 +172,9 @@ export default function QuotesAdmin() {
               ))}
               {selected.product_interest && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">Product Interested In</p>
+                  <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">
+                    {selected.category === 'Watches' ? 'Watch Name / Model' : 'Product Interested In'}
+                  </p>
                   <p className="text-sm text-gray-700">{selected.product_interest}</p>
                 </div>
               )}
@@ -171,7 +190,9 @@ export default function QuotesAdmin() {
               )}
               {selected.message && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">Message</p>
+                  <p className="text-[10px] uppercase tracking-wider font-sans text-gray-400 mb-2">
+                    {selected.category === 'Watches' ? 'Additional Requirements' : 'Message'}
+                  </p>
                   <p className="text-sm text-gray-700 bg-gray-50 p-3 leading-relaxed">{selected.message}</p>
                 </div>
               )}

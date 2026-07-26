@@ -23,13 +23,67 @@ export type ProductFormValues = {
   certification: string
   warranty: string
   sku: string
+  policy: string
+  gross_weight: string
+  gold_weight: string
+  diamond_weight: string
+  caratage: string
+  collection: string
+  case_size: string
+  case_material: string
+  movement: string
+  dial_colour: string
+  strap_material: string
+  crystal: string
+  water_resistance: string
+  power_reserve: string
+  functions: string
+  condition: string
+  box_papers: string
+  gender: string
+  year: string
 }
 
 const emptyForm: ProductFormValues = {
   name: '', category: 'Jewellery', subcategory: '', price: '',
   stock: 'Available', status: 'draft', image: '', description: '', story: '',
   material: '', weight: '', certification: '', warranty: '', sku: '',
+  policy: '', gross_weight: '', gold_weight: '', diamond_weight: '', caratage: '',
+  collection: '', case_size: '', case_material: '', movement: '', dial_colour: '',
+  strap_material: '', crystal: '', water_resistance: '', power_reserve: '', functions: '',
+  condition: '', box_papers: '', gender: '', year: '',
 }
+
+const JEWELLERY_SPEC_FIELDS = [
+  { k: 'material', l: 'Material', ph: '22K Gold, Diamond' },
+  { k: 'certification', l: 'Certification', ph: 'GIA, BIS 916' },
+  { k: 'warranty', l: 'Warranty', ph: 'Lifetime warranty' },
+  { k: 'sku', l: 'SKU / Reference', ph: 'RJ-2024-001' },
+  { k: 'policy', l: 'Policy', ph: '7-day exchange, no returns on customised pieces' },
+  { k: 'gross_weight', l: 'Gross Weight', ph: '45 grams' },
+  { k: 'gold_weight', l: 'Gold Weight', ph: '32 grams' },
+  { k: 'diamond_weight', l: 'Diamond Weight', ph: '1.2 carat' },
+  { k: 'caratage', l: 'Caratage', ph: '22K, 18K' },
+] as const
+
+const WATCH_SPEC_FIELDS = [
+  { k: 'sku', l: 'Reference Number', ph: '126610LN' },
+  { k: 'collection', l: 'Collection', ph: 'Submariner, Speedmaster…' },
+  { k: 'case_size', l: 'Case Size', ph: '40mm' },
+  { k: 'case_material', l: 'Case Material', ph: 'Stainless Steel, 18K Gold' },
+  { k: 'movement', l: 'Movement', ph: 'Automatic, Quartz' },
+  { k: 'dial_colour', l: 'Dial Colour', ph: 'Black, Blue' },
+  { k: 'strap_material', l: 'Strap / Bracelet Material', ph: 'Oyster Steel, Leather' },
+  { k: 'crystal', l: 'Crystal', ph: 'Sapphire' },
+  { k: 'water_resistance', l: 'Water Resistance', ph: '300m / 30 ATM' },
+  { k: 'power_reserve', l: 'Power Reserve', ph: '70 hours' },
+  { k: 'functions', l: 'Functions / Complications', ph: 'Date, Chronograph, GMT' },
+  { k: 'condition', l: 'Condition', ph: 'New, Pre-owned – Excellent' },
+  { k: 'box_papers', l: 'Box & Papers', ph: 'Full Set, Box Only, None' },
+  { k: 'warranty', l: 'Warranty', ph: '5-year international warranty' },
+  { k: 'gender', l: 'Gender', ph: "Men's, Women's, Unisex" },
+  { k: 'year', l: 'Year (Optional)', ph: '2023' },
+] as const
 
 export default function ProductForm({ product }: { product?: Product }) {
   const router = useRouter()
@@ -40,6 +94,13 @@ export default function ProductForm({ product }: { product?: Product }) {
           price: product.price, stock: product.stock, status: product.status, image: product.image,
           description: product.description, story: product.story, material: product.material,
           weight: product.weight, certification: product.certification, warranty: product.warranty, sku: product.sku,
+          policy: product.policy, gross_weight: product.gross_weight, gold_weight: product.gold_weight,
+          diamond_weight: product.diamond_weight, caratage: product.caratage,
+          collection: product.collection, case_size: product.case_size, case_material: product.case_material,
+          movement: product.movement, dial_colour: product.dial_colour, strap_material: product.strap_material,
+          crystal: product.crystal, water_resistance: product.water_resistance, power_reserve: product.power_reserve,
+          functions: product.functions, condition: product.condition, box_papers: product.box_papers,
+          gender: product.gender, year: product.year,
         }
       : emptyForm
   )
@@ -49,6 +110,8 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+
+  const isWatch = form.category === 'Watches'
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -108,16 +171,24 @@ export default function ProductForm({ product }: { product?: Product }) {
         <div className="lg:col-span-2 space-y-5">
           <div className="bg-white border border-gray-200 p-6 space-y-5">
             <h2 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-3">Product Details</h2>
-            {[
-              { k: 'name', l: 'Product Name *', ph: 'Royal Bridal Gold Necklace Set' },
-              { k: 'subcategory', l: 'Subcategory', ph: 'Bridal, Diamond, Polki…' },
-            ].map(({ k, l, ph }) => (
-              <div key={k}>
-                <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">{l}</label>
-                <input value={form[k as keyof ProductFormValues]} onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  placeholder={ph} className="w-full border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rw-gold transition-colors" />
-              </div>
-            ))}
+            <div>
+              <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">Product Name *</label>
+              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Royal Bridal Gold Necklace Set" className="w-full border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rw-gold transition-colors" />
+            </div>
+            <div>
+              <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">
+                {isWatch ? 'Brand' : 'Subcategory'}
+              </label>
+              <input value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+                placeholder={isWatch ? 'Rolex, Omega, TAG Heuer…' : 'Rings, Earrings, Bracelets…'}
+                className="w-full border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rw-gold transition-colors" />
+              {!isWatch && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Matches a category under Admin → Categories so this piece shows up in the right navigation menu.
+                </p>
+              )}
+            </div>
             <div>
               <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">Category</label>
               <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -138,15 +209,11 @@ export default function ProductForm({ product }: { product?: Product }) {
           </div>
 
           <div className="bg-white border border-gray-200 p-6 space-y-4">
-            <h2 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-3">Specifications</h2>
+            <h2 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-3">
+              {isWatch ? 'Watch Specifications' : 'Jewellery Specifications'}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { k: 'material', l: 'Material', ph: '22K Gold, Diamond' },
-                { k: 'weight', l: 'Weight', ph: '45 grams' },
-                { k: 'certification', l: 'Certification', ph: 'GIA, BIS 916' },
-                { k: 'warranty', l: 'Warranty', ph: 'Lifetime warranty' },
-                { k: 'sku', l: 'SKU / Reference', ph: 'RJ-2024-001' },
-              ].map(({ k, l, ph }) => (
+              {(isWatch ? WATCH_SPEC_FIELDS : JEWELLERY_SPEC_FIELDS).map(({ k, l, ph }) => (
                 <div key={k}>
                   <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">{l}</label>
                   <input value={form[k as keyof ProductFormValues]} onChange={(e) => setForm({ ...form, [k]: e.target.value })}
@@ -173,7 +240,7 @@ export default function ProductForm({ product }: { product?: Product }) {
             <div>
               <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">Price (₹)</label>
               <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}
-                placeholder="₹3,80,000" className="w-full border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rw-gold transition-colors" />
+                placeholder="₹3,80,000 (leave blank for &quot;Price on Request&quot;)" className="w-full border border-gray-200 px-4 py-3 text-sm outline-none focus:border-rw-gold transition-colors" />
             </div>
             <div>
               <label className="text-[10px] tracking-[0.2em] uppercase font-sans text-gray-500 block mb-2">Availability</label>

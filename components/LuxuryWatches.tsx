@@ -66,7 +66,7 @@ export default function LuxuryWatches() {
                   </div>
                 )}
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Link href={`/get-a-quote?product=${encodeURIComponent(watch.name)}`} className="bg-rw-gold text-white text-[10px] tracking-[0.2em] uppercase font-sans px-4 py-2">
+                  <Link href={`/get-a-quote?category=Watches&product=${encodeURIComponent(watch.name)}&brand=${encodeURIComponent(watch.subcategory)}&ref=${encodeURIComponent(watch.sku)}`} className="bg-rw-gold text-white text-[10px] tracking-[0.2em] uppercase font-sans px-4 py-2">
                     Enquire
                   </Link>
                 </div>

@@ -11,7 +11,7 @@ const ALLOWED_TYPES: Record<string, string> = {
   'image/webp': 'webp',
   'image/gif': 'gif',
 }
-const MAX_SIZE = 8 * 1024 * 1024
+const MAX_SIZE = 100 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   const session = await getSession()
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unsupported file type. Use JPEG, PNG, WebP or GIF.' }, { status: 400 })
   }
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'File too large. Maximum size is 8MB.' }, { status: 400 })
+    return NextResponse.json({ error: 'File too large. Maximum size is 100MB.' }, { status: 400 })
   }
 
   if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })

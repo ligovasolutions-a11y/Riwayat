@@ -79,7 +79,7 @@ export default function ImageUploadField({
         >
           {uploading ? <Loader2 size={18} className="animate-spin text-gray-400" /> : <Upload size={18} className="text-gray-300" />}
           <p className="text-sm text-gray-500">{uploading ? 'Uploading…' : 'Click to upload image'}</p>
-          <p className="text-xs text-gray-400">JPEG, PNG, WebP or GIF, up to 8MB</p>
+          <p className="text-xs text-gray-400">JPEG, PNG, WebP or GIF, up to 100MB</p>
         </button>
       )}
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}

@@ -18,6 +18,37 @@ export type Product = {
   warranty: string
   sku: string
   tags: string[]
+  // Jewellery-specific specifications
+  policy: string
+  gross_weight: string
+  gold_weight: string
+  diamond_weight: string
+  caratage: string
+  // Watch-specific specifications
+  collection: string
+  case_size: string
+  case_material: string
+  movement: string
+  dial_colour: string
+  strap_material: string
+  crystal: string
+  water_resistance: string
+  power_reserve: string
+  functions: string
+  condition: string
+  box_papers: string
+  gender: string
+  year: string
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export type JewelleryCategory = {
+  id: number
+  name: string
+  image: string
+  status: string
   sort_order: number
   created_at: string
   updated_at: string
@@ -75,11 +106,14 @@ export type Quote = {
   email: string
   phone: string
   company: string
+  category: string
   product_interest: string
   colour: string
   cut: string
   clarity: string
   carat_weight: string
+  reference_number: string
+  brand: string
   message: string
   status: string
   created_at: string
@@ -106,17 +140,34 @@ export function listPublishedProductsBySubcategorySlug(category: string, slug: s
   return listPublishedProducts()
     .filter((p) => p.category === category && slugify(p.subcategory) === slug)
 }
+// Plain text columns shared by both create and update (everything except id/tags/images/sort_order/timestamps).
+const PRODUCT_TEXT_FIELDS = [
+  'name', 'category', 'subcategory', 'price', 'stock', 'status', 'image',
+  'description', 'story', 'material', 'weight', 'certification', 'warranty', 'sku',
+  'policy', 'gross_weight', 'gold_weight', 'diamond_weight', 'caratage',
+  'collection', 'case_size', 'case_material', 'movement', 'dial_colour', 'strap_material',
+  'crystal', 'water_resistance', 'power_reserve', 'functions', 'condition', 'box_papers', 'gender', 'year',
+] as const
+
+function productTextValues(data: Partial<Product>): Record<string, string> {
+  const values: Record<string, string> = {}
+  for (const field of PRODUCT_TEXT_FIELDS) values[field] = (data[field] as string) ?? ''
+  if (!data.category) values.category = 'Jewellery'
+  if (!data.stock) values.stock = 'Available'
+  if (!data.status) values.status = 'draft'
+  return values
+}
+
 export function createProduct(data: Partial<Product>): Product {
+  const fields = PRODUCT_TEXT_FIELDS.join(', ')
+  const placeholders = PRODUCT_TEXT_FIELDS.map((f) => `@${f}`).join(', ')
   const info = db.prepare(`
-    INSERT INTO products (name, category, subcategory, price, stock, status, image, images, description, story, material, weight, certification, warranty, sku, tags)
-    VALUES (@name, @category, @subcategory, @price, @stock, @status, @image, @images, @description, @story, @material, @weight, @certification, @warranty, @sku, @tags)
+    INSERT INTO products (${fields}, images, tags)
+    VALUES (${placeholders}, @images, @tags)
   `).run({
-    name: data.name ?? '', category: data.category ?? 'Jewellery', subcategory: data.subcategory ?? '',
-    price: data.price ?? '', stock: data.stock ?? 'Available', status: data.status ?? 'draft',
-    image: data.image ?? '', images: JSON.stringify(data.images ?? []),
-    description: data.description ?? '', story: data.story ?? '',
-    material: data.material ?? '', weight: data.weight ?? '', certification: data.certification ?? '',
-    warranty: data.warranty ?? '', sku: data.sku ?? '', tags: JSON.stringify(data.tags ?? []),
+    ...productTextValues(data),
+    images: JSON.stringify(data.images ?? []),
+    tags: JSON.stringify(data.tags ?? []),
   })
   return getProduct(Number(info.lastInsertRowid))!
 }
@@ -124,12 +175,16 @@ export function updateProduct(id: number, data: Partial<Product>): Product | nul
   const existing = getProduct(id)
   if (!existing) return null
   const merged = { ...existing, ...data }
+  const setClause = PRODUCT_TEXT_FIELDS.map((f) => `${f}=@${f}`).join(', ')
   db.prepare(`
-    UPDATE products SET name=@name, category=@category, subcategory=@subcategory, price=@price, stock=@stock,
-      status=@status, image=@image, images=@images, description=@description, story=@story, material=@material, weight=@weight,
-      certification=@certification, warranty=@warranty, sku=@sku, tags=@tags, updated_at=datetime('now')
+    UPDATE products SET ${setClause}, images=@images, tags=@tags, updated_at=datetime('now')
     WHERE id=@id
-  `).run({ ...merged, id, tags: JSON.stringify(merged.tags ?? []), images: JSON.stringify(merged.images ?? []) })
+  `).run({
+    ...productTextValues(merged),
+    id,
+    tags: JSON.stringify(merged.tags ?? []),
+    images: JSON.stringify(merged.images ?? []),
+  })
   return getProduct(id)
 }
 export function deleteProduct(id: number) {
@@ -169,6 +224,38 @@ export function updateCollection(id: number, data: Partial<Collection>): Collect
 }
 export function deleteCollection(id: number) {
   db.prepare('DELETE FROM collections WHERE id = ?').run(id)
+}
+
+export function listJewelleryCategories(): JewelleryCategory[] {
+  return db.prepare('SELECT * FROM jewellery_categories ORDER BY sort_order ASC, id ASC').all() as JewelleryCategory[]
+}
+export function listActiveJewelleryCategories(): JewelleryCategory[] {
+  return db.prepare("SELECT * FROM jewellery_categories WHERE status = 'active' ORDER BY sort_order ASC, id ASC").all() as JewelleryCategory[]
+}
+export function getJewelleryCategory(id: number): JewelleryCategory | null {
+  return (db.prepare('SELECT * FROM jewellery_categories WHERE id = ?').get(id) as JewelleryCategory | undefined) ?? null
+}
+export function createJewelleryCategory(data: Partial<JewelleryCategory>): JewelleryCategory {
+  const info = db.prepare(`
+    INSERT INTO jewellery_categories (name, image, status, sort_order)
+    VALUES (@name, @image, @status, @sort_order)
+  `).run({
+    name: data.name ?? '', image: data.image ?? '', status: data.status ?? 'active', sort_order: data.sort_order ?? 0,
+  })
+  return getJewelleryCategory(Number(info.lastInsertRowid))!
+}
+export function updateJewelleryCategory(id: number, data: Partial<JewelleryCategory>): JewelleryCategory | null {
+  const existing = getJewelleryCategory(id)
+  if (!existing) return null
+  const merged = { ...existing, ...data }
+  db.prepare(`
+    UPDATE jewellery_categories SET name=@name, image=@image, status=@status, sort_order=@sort_order, updated_at=datetime('now')
+    WHERE id=@id
+  `).run({ ...merged, id })
+  return getJewelleryCategory(id)
+}
+export function deleteJewelleryCategory(id: number) {
+  db.prepare('DELETE FROM jewellery_categories WHERE id = ?').run(id)
 }
 
 export function listJournalPosts(): JournalPost[] {
@@ -267,12 +354,14 @@ export function getQuote(id: number): Quote | null {
 }
 export function createQuote(data: Partial<Quote>): Quote {
   const info = db.prepare(`
-    INSERT INTO quotes (name, email, phone, company, product_interest, colour, cut, clarity, carat_weight, message, status)
-    VALUES (@name, @email, @phone, @company, @product_interest, @colour, @cut, @clarity, @carat_weight, @message, @status)
+    INSERT INTO quotes (name, email, phone, company, category, product_interest, colour, cut, clarity, carat_weight, reference_number, brand, message, status)
+    VALUES (@name, @email, @phone, @company, @category, @product_interest, @colour, @cut, @clarity, @carat_weight, @reference_number, @brand, @message, @status)
   `).run({
     name: data.name ?? '', email: data.email ?? '', phone: data.phone ?? '', company: data.company ?? '',
+    category: data.category ?? 'Jewellery',
     product_interest: data.product_interest ?? '',
     colour: data.colour ?? '', cut: data.cut ?? '', clarity: data.clarity ?? '', carat_weight: data.carat_weight ?? '',
+    reference_number: data.reference_number ?? '', brand: data.brand ?? '',
     message: data.message ?? '', status: data.status ?? 'new',
   })
   return getQuote(Number(info.lastInsertRowid))!
