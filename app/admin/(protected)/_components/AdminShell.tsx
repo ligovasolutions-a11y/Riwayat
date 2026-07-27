@@ -62,7 +62,7 @@ export default function AdminShell({ email, children }: { email: string; childre
           <img src="/logo-icon.png" alt="" className="h-8 w-auto flex-shrink-0" />
           {(sidebarOpen || mobileOpen) && (
             <div>
-              <div className="text-lg tracking-[0.3em] font-serif font-light text-white uppercase">Riwaayat</div>
+              <div className="text-sm tracking-[0.15em] font-serif font-light text-white uppercase whitespace-nowrap">Riwaayat Jewels</div>
               <div className="text-[8px] tracking-[0.4em] uppercase font-sans text-rw-gold">Admin Portal</div>
             </div>
           )}

@@ -11,7 +11,7 @@ export default async function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <img src="/logo-icon.png" alt="" className="h-16 w-auto mx-auto mb-4" />
-          <div className="text-2xl tracking-[0.3em] font-serif font-light text-white uppercase">Riwaayat</div>
+          <div className="text-2xl tracking-[0.2em] font-serif font-light text-white uppercase whitespace-nowrap">Riwaayat Jewels</div>
           <div className="text-[9px] tracking-[0.5em] uppercase font-sans text-rw-gold mt-1">Admin Portal</div>
         </div>
         <LoginForm />

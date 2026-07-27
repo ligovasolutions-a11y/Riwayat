@@ -28,11 +28,8 @@ export default function Footer() {
         {/* Logo & tagline */}
         <div className="text-center mb-16 pb-16 border-b border-white/10">
           <img src="/logo-icon.png" alt="" className="h-14 lg:h-16 w-auto mx-auto mb-4" />
-          <div className="text-3xl lg:text-4xl tracking-[0.4em] font-serif font-light text-white mb-2 uppercase">
-            Riwaayat
-          </div>
-          <div className="text-[10px] tracking-[0.6em] uppercase font-sans text-rw-gold mb-6">
-            Jewels
+          <div className="text-xl sm:text-2xl lg:text-4xl tracking-[0.15em] sm:tracking-[0.25em] lg:tracking-[0.35em] font-serif font-light text-white mb-6 uppercase whitespace-nowrap px-4">
+            Riwaayat Jewels
           </div>
           <p className="text-white/40 font-sans font-light text-sm max-w-md mx-auto">
             Where Heritage Meets Time — crafting timeless jewellery and curating exceptional timepieces since 1974.
